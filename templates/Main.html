@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gym App Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css.css">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: #f4f4f4;
+        }
+        header {
+            background: #222;
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+        }
+        main {
+            padding: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        .body-icon {
+            width: 200px;
+            text-align: center;
+        }
+        .body-svg {
+            width: 120px;
+            height: 300px;
+            margin: 0 auto;
+            display: block;
+        }
+        .features {
+            flex: 1;
+            min-width: 250px;
+            max-width: 400px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 1.5rem;
+        }
+        .features h2 {
+            margin-top: 0;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            margin: 1rem 0;
+            display: flex;
+            align-items: center;
+        }
+        .feature-list li span {
+            font-size: 1.5rem;
+            margin-right: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Gym App Home</h1>
+        <p>Your fitness journey starts here!</p>
+    </header>
+    <main>
+        <section class="body-icon">
+            <!-- Simple SVG of a human body with visible body parts -->
+            <svg class="body-svg" viewBox="0 0 120 300">
+                <!-- Head -->
+                <circle cx="60" cy="40" r="25" fill="#f9d6b5" stroke="#bfa07a" stroke-width="2"/>
+                <!-- Body -->
+                <rect x="45" y="65" width="30" height="70" rx="15" fill="#f9d6b5" stroke="#bfa07a" stroke-width="2"/>
+                <!-- Arms -->
+                <rect x="15" y="75" width="30" height="15" rx="7" fill="#f9d6b5" stroke="#bfa07a" stroke-width="2"/>
+                <rect x="75" y="75" width="30" height="15" rx="7" fill="#f9d6b5" stroke="#bfa07a" stroke-width="2"/>
+                <!-- Legs -->
+                <rect x="48" y="135" width="12" height="60" rx="6" fill="#f9d6b5" stroke="#bfa07a" stroke-width="2"/>
+                <rect x="60" y="135" width="12" height="60" rx="6" fill="#f9d6b5" stroke="#bfa07a" stroke-width="2"/>
+                <!-- Labels for body parts -->
+                <text x="60" y="30" font-size="10" text-anchor="middle" fill="#333">Head</text>
+                <text x="60" y="110" font-size="10" text-anchor="middle" fill="#333">Torso</text>
+                <text x="25" y="70" font-size="10" text-anchor="middle" fill="#333">Left Arm</text>
+                <text x="95" y="70" font-size="10" text-anchor="middle" fill="#333">Right Arm</text>
+                <text x="54" y="210" font-size="10" text-anchor="middle" fill="#333">Left Leg</text>
+                <text x="66" y="210" font-size="10" text-anchor="middle" fill="#333">Right Leg</text>
+            </svg>
+            <div>
+                <strong>Body Parts</strong>
+                <ul style="padding:0; list-style:none; font-size:0.95rem;">
+                    <li>Head</li>
+                    <li>Arms</li>
+                    <li>Torso</li>
+                    <li>Legs</li>
+                </ul>
+            </div>
+        </section>
+        <section class="features">
+            <h2>App Features</h2>
+            <ul class="feature-list">
+                <li><span>🏋️‍♂️</span> Workout Plans</li>
+                <li><span>🍎</span> Nutrition Tracking</li>
+                <li><span>📈</span> Progress Charts</li>
+                <li><span>📝</span> Exercise Log</li>
+                <li><span>⏰</span> Schedule & Reminders</li>
+                <li><span>👥</span> Community & Support</li>
+                <li><span>🎯</span> Goal Setting</li>
+            </ul>
+        </section>
+    </main>
+</body>
+</html>
