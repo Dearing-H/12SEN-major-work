@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Gym Sign Up</title>
+    <style>
+        /* Background and layout */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', sans-serif;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #0c132d;
+            color: #ffffff;
+            position: relative;
+        }
+
+        .background {
+            background: url('https://images.unsplash.com/photo-1571019613914-85f342c1d4e1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80') no-repeat center center/cover;
+            position: absolute;
+            top: 0; left: 0;
+            height: 100%;
+            width: 100%;
+            z-index: -1;
+            filter: brightness(0.8);
+        }
+
+        /* Form Container */
+        .form-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+        }
+
+        /* Heading */
+        .form-container h1 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #ffffffdd;
+        }
+
+        /* Input Styles */
+        form input, form select {
+            width: 100%;
+            padding: 12px 1px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        /* Placeholder */
+        form input::placeholder {
+            color: #ffffff;
+        }
+
+        /* Button */
+        form button {
+            width: 100%;
+            padding: 50px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        form button:hover {
+            background: linear-gradient(45deg, #ff4b2b, #ff416c);
+        }
+
+        /* Responsive */
+        @media screen and (max-width: 500px) {
+            .form-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+
+    <div class="form-container">
+        <h1>Join The Fit Zone</h1>
+        <form action="/sign_up" method="post">
+            <input type="text" placeholder="👤 Username" name="username" required />
+            <input type="password" placeholder="🔒 Password" name="password" required />
+            <input type="password" placeholder="🔒 Confirm Password" name="confirm_password" required />
+            
+            <input type="number" placeholder="⚖️ Your Weight (kg)" name="weight" required />
+            <input type="number" placeholder="📏 Your Height (cm)" name="height" required />
+
+            <select name="goal" required>
+                <option value="">🎯 Choose Your Goal</option>
+                <option value="lose">🏋Lose Weight</option>
+                <option value="gain">💪🏼Gain Muscle</option>
+                <option value="tone
