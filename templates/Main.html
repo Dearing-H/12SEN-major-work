@@ -2,16 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Gym App Home</title>
+  <title>Muscle Anatomy Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
-    /* ==== RESET ==== */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     html, body {
       font-family: 'Inter', sans-serif;
@@ -27,15 +22,22 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
 
-    header h1 {
-      font-size: 2.2rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
+    header h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+    header p { font-size: 1.1rem; opacity: 0.85; }
+
+    #genderToggle {
+      margin-top: 1rem;
     }
 
-    header p {
-      font-size: 1.1rem;
-      opacity: 0.85;
+    #genderToggle button {
+      margin: 0 10px;
+      padding: 10px 15px;
+      font-weight: bold;
+      background-color: #fff;
+      color: #2c3e50;
+      border: 2px solid #2c3e50;
+      border-radius: 6px;
+      cursor: pointer;
     }
 
     main {
@@ -57,11 +59,6 @@
       border-radius: 12px;
       padding: 1.5rem;
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-      transition: transform 0.3s;
-    }
-
-    .body-icon:hover {
-      transform: translateY(-5px);
     }
 
     .body-svg {
@@ -69,20 +66,7 @@
       height: 320px;
       display: block;
       margin: 0 auto 1rem auto;
-      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.2));
-    }
-
-    .body-icon strong {
-      display: block;
-      margin-top: 1rem;
-      font-size: 1.1rem;
-    }
-
-    .body-icon ul {
-      list-style: none;
-      padding: 0;
-      margin-top: 0.5rem;
-      font-size: 0.95rem;
+      cursor: pointer;
     }
 
     .features {
@@ -93,19 +77,9 @@
       border-radius: 12px;
       padding: 2rem;
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-      transition: transform 0.3s;
     }
 
-    .features:hover {
-      transform: translateY(-5px);
-    }
-
-    .features h2 {
-      margin-bottom: 1.25rem;
-      font-size: 1.6rem;
-      font-weight: 600;
-      color: #2c3e50;
-    }
+    .features h2 { margin-bottom: 1.25rem; font-size: 1.6rem; font-weight: 600; color: #2c3e50; }
 
     .feature-list {
       list-style: none;
@@ -113,21 +87,21 @@
     }
 
     .feature-list li {
-      display: flex;
-      align-items: center;
       margin: 1rem 0;
       font-size: 1rem;
-      transition: 0.2s ease-in-out;
     }
 
-    .feature-list li span {
-      font-size: 1.6rem;
-      margin-right: 0.8rem;
+    #weekTracker {
+      margin-top: 1rem;
+      background: #eef;
+      padding: 1rem;
+      border-radius: 10px;
+      text-align: left;
     }
 
-    .feature-list li:hover {
-      color: #3742fa;
-      transform: translateX(5px);
+    #weekTracker h3 {
+      margin-bottom: 0.5rem;
+      font-weight: 600;
     }
 
     @media (max-width: 768px) {
@@ -144,40 +118,101 @@
 </head>
 <body>
   <header>
-    <h1>Gym App Home</h1>
-    <p>Your fitness journey starts here!</p>
+    <h1>Muscle Anatomy Tracker</h1>
+    <p>Tap to log workouts. Color shows how hard you've trained 💪</p>
+    <div id="genderToggle">
+      <button onclick="toggleGender('male')">Male</button>
+      <button onclick="toggleGender('female')">Female</button>
+    </div>
   </header>
 
   <main>
     <section class="body-icon">
-      <svg class="body-svg" viewBox="0 0 120 300">
-        <circle cx="60" cy="40" r="25" fill="#f9d6b5" stroke="#bfa07a" stroke-width="2"/>
-        <rect x="45" y="65" width="30" height="70" rx="15" fill="#f9d6b5" stroke="#bfa07a" stroke-width="2"/>
-        <rect x="15" y="75" width="30" height="15" rx="7" fill="#f9d6b5" stroke="#bfa07a" stroke-width="2"/>
-        <rect x="75" y="75" width="30" height="15" rx="7" fill="#f9d6b5" stroke="#bfa07a" stroke-width="2"/>
-        <rect x="48" y="135" width="12" height="60" rx="6" fill="#f9d6b5" stroke="#bfa07a" stroke-width="2"/>
-        <rect x="60" y="135" width="12" height="60" rx="6" fill="#f9d6b5" stroke="#bfa07a" stroke-width="2"/>
-        <text x="60" y="30" font-size="10" text-anchor="middle" fill="#333">Head</text>
-        <text x="60" y="110" font-size="10" text-anchor="middle" fill="#333">Torso</text>
-        <text x="25" y="70" font-size="10" text-anchor="middle" fill="#333">Left Arm</text>
-        <text x="95" y="70" font-size="10" text-anchor="middle" fill="#333">Right Arm</text>
-        <text x="38" y="210" font-size="10" text-anchor="middle" fill="#333">Left Leg</text>
-        <text x="88" y="210" font-size="10" text-anchor="middle" fill="#333">Right Leg</text>
+      <svg class="body-svg" viewBox="0 0 120 300" id="muscleSvg">
+        <!-- MALE SVG -->
+        <g id="maleModel">
+          <circle id="head" cx="60" cy="40" r="25" />
+          <rect id="torso" x="45" y="65" width="30" height="70" rx="15" />
+          <rect id="leftArm" x="15" y="75" width="30" height="15" rx="7" />
+          <rect id="rightArm" x="75" y="75" width="30" height="15" rx="7" />
+          <rect id="leftLeg" x="45" y="135" width="12" height="60" rx="6" />
+          <rect id="rightLeg" x="60" y="135" width="12" height="60" rx="6" />
+        </g>
+
+        <!-- FEMALE SVG -->
+        <g id="femaleModel" style="display: none;">
+          <circle id="f_head" cx="60" cy="40" r="25" />
+          <rect id="f_torso" x="45" y="65" width="30" height="70" rx="15" />
+          <rect id="f_leftArm" x="15" y="75" width="30" height="15" rx="7" />
+          <rect id="f_rightArm" x="75" y="75" width="30" height="15" rx="7" />
+          <rect id="f_leftLeg" x="48" y="135" width="12" height="60" rx="6" />
+          <rect id="f_rightLeg" x="60" y="135" width="12" height="60" rx="6" />
+        </g>
       </svg>
-      </section>
+      <div id="weekTracker">
+        <h3>Workout Log</h3>
+        <div id="weekInfo"></div>
+      </div>
+    </section>
 
     <section class="features">
       <h2>App Features</h2>
       <ul class="feature-list">
-        <li><span>🏋️‍♂️</span> Workout Plans</li>
-        <li><span>🍎</span> Nutrition Tracking</li>
-        <li><span>📈</span> Progress Charts</li>
-        <li><span>📝</span> Exercise Log</li>
-        <li><span>⏰</span> Schedule & Reminders</li>
-        <li><span>👥</span> Community & Support</li>
-        <li><span>🎯</span> Goal Setting</li>
+        <li>🏋️‍♂️ Track workouts per muscle</li>
+        <li> Visual feedback with color</li>
+        <li>🧍 Toggle male / female anatomy</li>
+        <li>📅 Weekly progression display</li>
+        <li>🧠 All data in real-time</li>
       </ul>
     </section>
   </main>
+
+  <script>
+    let currentGender = "male";
+    const muscles = {
+      head: 0, torso: 0, leftArm: 0, rightArm: 0, leftLeg: 0, rightLeg: 0,
+      f_head: 0, f_torso: 0, f_leftArm: 0, f_rightArm: 0, f_leftLeg: 0, f_rightLeg: 0
+    };
+
+    function toggleGender(gender) {
+      currentGender = gender;
+      document.getElementById("maleModel").style.display = gender === "male" ? "block" : "none";
+      document.getElementById("femaleModel").style.display = gender === "female" ? "block" : "none";
+      updateWeekDisplay();
+    }
+
+    document.querySelectorAll("rect, circle").forEach(el => {
+      el.style.fill = "#f9d6b5";
+      el.style.stroke = "#bfa07a";
+      el.style.strokeWidth = "2";
+      el.addEventListener("click", () => {
+        const id = el.id;
+        muscles[id]++;
+        el.style.fill = getColor(muscles[id]);
+        updateWeekDisplay();
+      });
+    });
+
+    function getColor(count) {
+      if (count === 0) return "#f9d6b5";     // default
+      if (count <= 2) return "lightgreen";   // light
+      if (count <= 4) return "orange";       // moderate
+      return "red";                          // heavy
+    }
+
+    function updateWeekDisplay() {
+      const relevantMuscles = Object.keys(muscles).filter(id =>
+        currentGender === "male" ? !id.startsWith("f_") : id.startsWith("f_")
+      );
+      let html = "<ul>";
+      relevantMuscles.forEach(id => {
+        html += `<li>${id.replace(/f_/, '').replace(/([A-Z])/g, ' $1')}: ${muscles[id]} sets</li>`;
+      });
+      html += "</ul>";
+      document.getElementById("weekInfo").innerHTML = html;
+    }
+
+    updateWeekDisplay(); // initial render
+  </script>
 </body>
 </html>
