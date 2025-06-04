@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FITZONE</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #e91e63;
+      --bg: #1e1e1e;
+      --tile-bg: #2c2c2c;
+      --accent: #000000;
+      --text: #f0f0f0;
+      --input-bg: #3c3c3c;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      background-color: #111;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    header h1 {
+      margin: 0;
+      color: var(--primary);
+      font-size: 2rem;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 3fr 1fr;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .main-content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .tile {
+      background-color: var(--tile-bg);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      transition: transform 0.2s ease;
+    }
+
+    .tile:hover {
+      transform: translateY(-5px);
+    }
+
+    .tile h2 {
+      color: var(--primary);
+      margin-bottom: 15px;
+      font-size: 1.5rem;
+    }
+
+    .tile input,
+    .tile select,
+    .tile button {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 8px;
+      background-color: var(--input-bg);
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    .tile button {
+      background-color: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+
+    .tile button:hover {
+      background-color: var(--accent);
+    }
+
+    .muscle-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .muscle {
+      flex: 1 1 45%;
+    }
+
+    .workout-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .workout-list li {
+      background-color: var(--input-bg);
+      margin: 6px 0;
+      padding: 10px;
+      border-radius: 6px;
+    }
+
+    .body-type-options {
+      display: flex;
+      justify-content: space-around;
+      gap: 10px;
+    }
+
+    .body-type {
+      text-align: center;
+      flex: 1;
+    }
+
+    .body-type svg {
+      width: 80px;
+      height: 100px;
+    }
+
+    .body-type input {
+      margin-top: 10px;
+    }
+
+    .sidebar {
+      background-color: var(--tile-bg);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      color: var(--text);
+    }
+
+    .sidebar h2 {
+      color: var(--primary);
+      margin-top: 0;
+    }
+
+    .sidebar ul {
+      list-style: in;
+      padding-left: 0;
+    }
+
+    .sidebar textarea {
+      width: 100%;
+      height: 150px;
+      background-color: var(--input-bg);
+      color: var(--text);
+      border: none;
+      border-radius: 8px;
+      padding: 10px;
+      margin-top: 10px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .body-type-options {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .body-type {
+        margin-bottom: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>FITZONE</h1>
+  </header>
+
+  <div class="layout">
+    <main class="main-content">
+      <div class="container">
+        <!-- Calorie Counter -->
+        <div class="tile">
+          <h2>Calorie Counter</h2>
+          <input type="number" id="age" placeholder="Age">
+          <input type="number" id="weight" placeholder="Weight (kg)">
+          <input type="number" id="height" placeholder="Height (cm)">
+          <select id="gender">
+            <option value="">Select Gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+          <select id="activity">
+            <option value="">Activity Level</option>
+            <option value="sedentary">Sedentary</option>
+            <option value="light">Light</option>
+            <option value="moderate">Moderate</option>
+            <option value="active">Active</option>
+            <option value="very active">Very Active</option>
+          </select>
+          <select id="goal">
+            <option value="">Goal</option>
+            <option value="cut">Cut</option>
+            <option value="maintain">Maintain</option>
+            <option value="bulk">Bulk</option>
+          </select>
+          <button onclick="calculateCalories()">Calculate</button>
+          <p id="calorie-result"></p>
+        </div>
+
+        <!-- Muscle Group Tracker -->
+        <div class="tile">
+          <h2>Muscle Group Tracker</h2>
+          <div class="muscle-group">
+            <label class="muscle"><input type="button" value="Chest"></label>
+            <label class="muscle"><input type="checkbox" value="Back"> Back</label>
+            <label class="muscle"><input type="checkbox" value="Legs"> Legs</label>
+            <label class="muscle"><input type="checkbox" value="Arms"> Arms</label>
+            <label class="muscle"><input type="checkbox" value="Shoulders"> Shoulders</label>
+            <label class="muscle"><input type="checkbox" value="Core"> Core</label>
+          </div>
+          <button onclick="trackMuscles()">Track</button>
+          <p id="muscle-result"></p>
+        </div>
+
+        <!-- Body Type Selection -->
+        <div class="tile">
+          <h2>Body Type</h2>
+          <div class="body-type-options">
+            <div class="body-type">
+              <svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg">
+                <rect width="80" height="100" rx="10" fill="#2c2c2c" />
+                <ellipse cx="40" cy="50" rx="18" ry="30" fill="#e91e63" />
+                <text x="40" y="95" font-size="12" text-anchor="middle" fill="#ffffff">Endomorph</text>
+              </svg>
+              <br>
+              <input type="radio" name="bodyType" value="Endomorph"> Endomorph
+            </div>
+            <div class="body-type">
+              <svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg">
+                <rect width="80" height="100" rx="10" fill="#34495e" />
+                <rect x="30" y="20" width="20" height="60" fill="#e91e63" />
+                <text x="40" y="95" font-size="12" text-anchor="middle" fill="#ffffff">Mesomorph</text>
+              </svg>
+              <br>
+              <input type="radio" name="bodyType" value="Mesomorph"> Mesomorph
+            </div>
+            <div class="body-type">
+              <svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg">
+                <rect width="80" height="100" rx="10" fill="#2c3e50" />
+                <line x1="40" y1="20" x2="40" y2="80" stroke="#e91e63" stroke-width="4"/>
+                <text x="40" y="95" font-size="12" text-anchor="middle" fill="#ffffff">Ectomorph</text>
+              </svg>
+              <br>
+              <input type="radio" name="bodyType" value="Ectomorph"> Ectomorph
+            </div>
+          </div>
+          <button onclick="selectBodyType()">Select</button>
+          <p id="bodytype-result"></p>
+        </div>
+
+        <!-- Workout Routines -->
+        <div class="tile">
+          <h2>Workout Routines</h2>
+          <ul class="workout-list">
+            <li><strong>Full Body Blast</strong><br>Squats, Bench Press, Deadlifts</li>
+            <li><strong>Upper Body Strength</strong><br>Pull-ups, Shoulder Press, Bicep Curls</li>
+            <li><strong>Cardio Burn</strong><br>Running, Jump Rope, Cycling</li>
+          </ul>
+        </div>
+      </div>
+    </main>
+
+    <aside class="sidebar">
+      <h2>Quick Tips 💡</h2>
+      <ul>
+        <li>Stay hydrated</li>
+        <li>Warm-up before lifting</li>
+        <li>Consistency is key</li>
+        <li>Track your progress</li>
+      </ul>
+
+      <h2>Notes 📝</h2>
+      <textarea placeholder="Write your workout notes here..."></textarea>
+    </aside>
+  </div>
+
+  <script>
+    function calculateCalories() {
+      const age = parseInt(document.getElementById('age').value);
+      const weight = parseFloat(document.getElementById('weight').value);
+      const height = parseFloat(document.getElementById('height').value);
+      const gender = document.getElementById('gender').value;
+      const activity = document.getElementById('activity').value;
+      const goal = document.getElementById('goal').value;
+
+      if (!age || !weight || !height || !gender || !activity || !goal) {
+        alert('Please fill in all fields.');
+        return;
+      }
+
+      let bmr = (gender === 'male')
+        ? 10 * weight + 6.25 * height - 5 * age + 5
+        : 10 * weight + 6.25 * height - 5 * age - 161;
+
+      const activityFactors = {
+        'sedentary': 1.2,
+        'light': 1.375,
+        'moderate': 1.55,
+        'active': 1.725,
+        'very active': 1.9
+      };
+
+      const tdee = bmr * (activityFactors[activity] || 1.2);
+      const targetCalories = goal === 'cut' ? tdee - 500 :
+                            goal === 'bulk' ? tdee + 500 : tdee;
+
+      document.getElementById('calorie-result').innerHTML = `
+        <strong>BMR:</strong> ${bmr.toFixed(1)} kcal<br>
+        <strong>TDEE:</strong> ${tdee.toFixed(1)} kcal<br>
+        <strong>Target (${goal}):</strong> ${targetCalories.toFixed(1)} kcal
+      `;
+    }
+
+    function trackMuscles() {
+      const checkboxes = document.querySelectorAll('.muscle-group input[type="checkbox"]');
+      const selected = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+      document.getElementById('muscle-result').innerText =
+        selected.length ? `Muscles Worked: ${selected.join(', ')}` : 'No muscles selected.';
+    }
+
+    function selectBodyType() {
+      const selectedType = Array.from(document.getElementsByName('bodyType'))
+        .find(radio => radio.checked)?.value;
+      document.getElementById('bodytype-result').innerText =
+        selectedType ? `Selected Body Type: ${selectedType}` : 'No body type selected.';
+    }
+  </script>
+</body>
+</html>

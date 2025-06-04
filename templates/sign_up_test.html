@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Gym Sign Up</title>
     <style>
-        /* Background and layout */
         body, html {
             margin: 0;
             padding: 0;
@@ -29,7 +28,6 @@
             filter: brightness(0.8);
         }
 
-        /* Form Container */
         .form-container {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 20px;
@@ -41,14 +39,12 @@
             text-align: center;
         }
 
-        /* Heading */
         .form-container h1 {
             font-size: 1.8rem;
             margin-bottom: 20px;
             color: #ffffffdd;
         }
 
-        /* Input Styles */
         form input, form select {
             width: 100%;
             padding: 12px 1px;
@@ -61,15 +57,13 @@
             outline: none;
         }
 
-        /* Placeholder */
         form input::placeholder {
             color: #ffffff;
         }
 
-        /* Button */
         form button {
             width: 100%;
-            padding: 50px;
+            padding: 15px;
             border: none;
             border-radius: 10px;
             background: linear-gradient(45deg, #ff416c, #ff4b2b);
@@ -84,7 +78,13 @@
             background: linear-gradient(45deg, #ff4b2b, #ff416c);
         }
 
-        /* Responsive */
+        .validation-msg {
+            text-align: left;
+            font-size: 0.9rem;
+            margin-top: -5px;
+            margin-bottom: 10px;
+        }
+
         @media screen and (max-width: 500px) {
             .form-container {
                 padding: 20px;
@@ -99,9 +99,18 @@
         <h1>Join The Fit Zone</h1>
         <form action="/sign_up" method="post">
             <input type="text" placeholder="👤 Username" name="username" required />
-            <input type="password" placeholder="🔒 Password" name="password" required />
-            <input type="password" placeholder="🔒 Confirm Password" name="confirm_password" required />
-            
+
+            <input type="password" id="password" placeholder="🔒 Password" name="password" oninput="validatePassword()" required />
+            <div class="validation-msg">
+                <div id="len_lbl">📏 Length</div>
+                <div id="case_lbl">🔡 Case</div>
+                <div id="num_lbl">🔢 Number</div>
+                <div id="special_lbl">✨ Special Char</div>
+            </div>
+
+            <input type="password" id="confirm_password" placeholder="🔒 Confirm Password" name="confirm_password" oninput="validatePassword()" required />
+            <div class="validation-msg" id="confirm_password_msg">✅/❌ Match</div>
+
             <input type="number" placeholder="⚖️ Your Weight (kg)" name="weight" required />
             <input type="number" placeholder="📏 Your Height (cm)" name="height" required />
 
@@ -109,4 +118,55 @@
                 <option value="">🎯 Choose Your Goal</option>
                 <option value="lose">🏋Lose Weight</option>
                 <option value="gain">💪🏼Gain Muscle</option>
-                <option value="tone
+                <option value="tone">🏃‍♂️Tone Up</option>
+            </select>
+
+            <button type="submit">🔥 Join Now</button>
+        </form>
+    </div>
+
+    <script>
+        function validatePassword() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            const lenLbl = document.getElementById('len_lbl');
+            const caseLbl = document.getElementById('case_lbl');
+            const numLbl = document.getElementById('num_lbl');
+            const specialLbl = document.getElementById('special_lbl');
+
+            if (password.length < 6) {
+                lenLbl.textContent = '❌ Too short';
+            } else {
+                lenLbl.textContent = '✅ Length good';
+            }
+
+            if (password === password.toLowerCase()) {
+                caseLbl.textContent = '❌ Add uppercase';
+            } else if (password === password.toUpperCase()) {
+                caseLbl.textContent = '❌ Add lowercase';
+            } else {
+                caseLbl.textContent = '✅ Mixed case';
+            }
+
+            if (/\d/.test(password)) {
+                numLbl.textContent = '✅ Contains number';
+            } else {
+                numLbl.textContent = '❌ Add number';
+            }
+
+            const specialChars = /[!@#$%^&*(),.?":{}|<>]/;
+            if (specialChars.test(password)) {
+                specialLbl.textContent = '✅ Contains special';
+            } else {
+                specialLbl.textContent = '❌ Add special';
+            }
+
+            if (password === confirmPassword && password !== '') {
+                document.getElementById('confirm_password_msg').textContent = '✅ Match';
+            } else {
+                document.getElementById('confirm_password_msg').textContent = '❌ No match';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,88 +1,69 @@
-from flask import Flask, render_template, request
-import openai
+from flask import Flask, render_template, request, flash, session, redirect, url_for
+from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
+from datetime import datetime
+# from setup_db import User, Gym, ToDo
 
-app = Flask(__name__)
+import os
+app = Flask(__name__, template_folder=os.path.join(os.getcwd(), "templates"))
+app.secret_key = "abc123"  # 🔐 use environment var in production
 
-# ⚠️ NEVER expose your key in production. Use environment variables!
-openai.api_key = "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"
+# Database setup
+engine = create_engine("sqlite:///FITZONE.db")
+Session = sessionmaker(bind=engine)
+db_session = Session()
 
-class Calculator:
-    def __init__(self, age, weight, height, gender, activity):
-        self.age = age
-        self.weight = weight
-        self.height = height
-        self.gender = gender.lower()
-        self.activity = activity.lower()
-
-    def bmr(self):
-        if self.gender == "male":
-            return 10 * self.weight + 6.25 * self.height - 5 * self.age + 5
-        else:
-            return 10 * self.weight + 6.25 * self.height - 5 * self.age - 161
-
-    def tdee(self):
-        factors = {
-            "sedentary": 1.2,
-            "light": 1.375,
-            "moderate": 1.55,
-            "active": 1.725,
-            "very active": 1.9
-        }
-        return self.bmr() * factors.get(self.activity, 1.2)
-
-def get_gpt_explanation(age, weight, height, gender, activity, goal, bmr, tdee, target):
-    try:
-        prompt = (
-            f"Explain in simple terms the calorie needs for a {gender.lower()}, age {age}, "
-            f"weighing {weight}kg, {height}cm tall, activity level '{activity}', "
-            f"with a goal to '{goal}'.\n\n"
-            f"The BMR is {bmr:.1f}, TDEE is {tdee:.1f}, and the goal target is {target:.1f} kcal."
-        )
-
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful fitness and nutrition assistant."},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=150,
-            temperature=0.7
-        )
-        return response.choices[0].message.content.strip()
-
-    except Exception as e:
-        return f"GPT Error: {e}"
-
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def index():
-    if request.method == 'POST':
-        try:
-            age = int(request.form['age'])
-            weight = float(request.form['weight'])
-            height = float(request.form['height'])
-            gender = request.form['gender']
-            activity = request.form['activity']
-            goal = request.form['goal']
+    return render_template('index.html')  # ⬅️ This WILL work if file exists
 
-            calc = Calculator(age, weight, height, gender, activity)
-            bmr = calc.bmr()
-            tdee = calc.tdee()
+@app.route('/sign_up_test', methods=["GET", "POST"])
+def sign_up():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        confirm_password = request.form.get("confirm_password")
 
-            if goal.lower() == "cut":
-                target = tdee - 500
-            elif goal.lower() == "bulk":
-                target = tdee + 500
-            else:
-                target = tdee
+        if not username or not password or not confirm_password:
+            flash("All fields are required.", "danger")
+            return render_template("sign_up_test.html")
 
-            gpt_message = get_gpt_explanation(age, weight, height, gender, activity, goal, bmr, tdee, target)
+        if password != confirm_password:
+            flash("Passwords do not match", "danger")
+            return render_template('sign_up_test.html')
 
-            return render_template('result.html',
-                                   bmr=bmr,
-                                   tdee=tdee,
-                                   target=target,
-                                   gpt_message=gpt_message)
+        # existing_user = db_session.query(User).filter_by(username=username).first()
+        # if existing_user:
+        #     flash("Username already exists", "danger")
+        #     return render_template('sign_up_test.html')
 
-        except Exception as e:
-            return render_template('index.html', error=f"Error: {e}")
-    return render_template('index.html')
+        # hashed_password = generate_password_hash(password)
+        # new_user = User(username=username, password=hashed_password)
+        # db_session.add(new_user)
+        # db_session.commit()
+
+        flash("You have successfully signed up", "success")
+        return redirect(url_for('login'))
+
+    return render_template('sign_up_test.html')
+
+@app.route('/login', methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        # user = db_session.query(User).filter_by(username=username).first()
+        # if user and check_password_hash(user.password, password):
+        #     session["user"] = username
+        #     flash("You have successfully logged in", "success")
+        #     return redirect(url_for('dashboard'))
+
+        flash("Invalid username or password", "danger")
+        return render_template('login.html')
+
+    return render_template('login.html')
+
+if __name__ == '__main__':
+    app.run(debug=True)
