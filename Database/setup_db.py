@@ -28,7 +28,7 @@ class Gym(Base):
     reps = Column(Boolean, default=False)
     Exercise_weight = Column(Date, nullable=True)  # Added due_date column
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    user = relationship('User', back_populates='')
+    user = relationship('User', back_populates='todos')
 
     # Method to mark task as done
     def mark_as_done(self):
