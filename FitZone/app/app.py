@@ -2,8 +2,8 @@ from flask import Flask, render_template, request, flash, session, redirect, url
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-# from setup_db import User  # ✅ Only User model imported
 import os
+# from DataBase.setup_db import User  # Adjust the import based on your project structure
 
 # ⚙️ Flask config
 app = Flask(__name__, template_folder=os.path.join(os.getcwd(), "templates"))
@@ -67,6 +67,15 @@ def login():
         return render_template("login.html")
 
     return render_template("login.html")
+
+
+# 👤 Main
+@app.route('/main')
+def main():
+    if "users" not in session:
+        flash("Please log in first", "Warning")
+        return redirect(url_for("login.html"))
+    return f"Welcome to your dashboard, {session['users']}"
 
 # # 👤 Dashboard
 # @app.route('/dashboard')

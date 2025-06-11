@@ -1,41 +1,70 @@
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignKey, Date
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, sessionmaker
-from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, Float, Date, ForeignKey
+from sqlalchemy.orm import declarative_base, relationship, sessionmaker
+from werkzeug.security import generate_password_hash
+from datetime import date
 
-# Base class for ORM models
 Base = declarative_base()
 
-# User model
+# --- Models ---
 class User(Base):
     __tablename__ = 'users'
+    
     id = Column(Integer, primary_key=True)
     username = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
-    weight = Column(Integer, nullable=False)
-    height = Column(Integer, nullable=False )
-    # todos = relationship('ToDo', back_populates='user')
 
-    # Method to check password
-    def check_password(self, password):
-        return check_password_hash(self.password, password)
+    todos = relationship('Gym', back_populates='user')
 
-# ToDo model
+
 class Gym(Base):
-    __tablename__ = 'Gym Function'
+    __tablename__ = 'gym_function'  # Use snake_case for table names (no spaces)
+
     id = Column(Integer, primary_key=True)
     meal = Column(String, nullable=False)
     reps = Column(Boolean, default=False)
-    Exercise_weight = Column(Date, nullable=True)  # Added due_date column
+    exercise_weight = Column(Float, nullable=True)  # ✅ Weight lifted
+    exercise_date = Column(Date, default=date.today)  # ✅ Date of exercise
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+
     user = relationship('User', back_populates='todos')
 
-    # Method to mark task as done
     def mark_as_done(self):
-        self.done = True
+        self.reps = True
 
-if __name__ == '__main__':
-    # Database setup
-    engine = create_engine('sqlite:///FITZONE.db')
-    Base.metadata.create_all(engine)
-    print("Database and tables created successfully.")
+# --- Setup database connection ---
+engine = create_engine('sqlite:///FITZONE.db', echo=True)  # echo=True shows SQL commands
+Session = sessionmaker(bind=engine)
+session = Session()
+
+# --- Create tables ---
+Base.metadata.drop_all(engine)  # Wipe old schema (CAUTION: data loss)
+Base.metadata.create_all(engine)
+
+# --- Insert users ---
+user1 = User(username='john_doe', password=generate_password_hash('password123'))
+user2 = User(username='jane_doe', password=generate_password_hash('mypassword'))
+user3 = User(username='admin',password=generate_password_hash('123'))
+session.add_all([user1, user2,user3])
+session.commit()
+
+# --- Insert gym tasks ---
+gym1 = Gym(
+    meal='High protein chicken meal',
+    reps=True,
+    exercise_weight=60.0,
+    exercise_date=date(2025, 6, 4),
+    user_id=user1.id
+)
+
+gym2 = Gym(
+    meal='Leg day - squats',
+    reps=False,
+    exercise_weight=100.0,
+    exercise_date=date(2025, 6, 6),
+    user_id=user2.id
+)
+
+session.add_all([gym1, gym2])
+session.commit()
+
+print("✅ Users and gym entries inserted successfully.")
