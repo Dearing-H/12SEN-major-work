@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 import os
-# from DataBase.setup_db import User  # Adjust the import based on your project structure
+from DataBase.setup_db import User  # Adjust the import based on your project structure
 
 # ⚙️ Flask config
 app = Flask(__name__, template_folder=os.path.join(os.getcwd(), "templates"))
