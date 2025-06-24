@@ -1,248 +1,380 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>GymPro Dashboard</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f0f2f5;
-      margin: 0;
-      padding: 0;
-    }
+<meta charset="UTF-8"/>
+<title>Smart AI Gym Dashboard</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.rawgit.com/konvajs/konva/7.0.3/konva.min.js"></script>
+<style>
+  :root {
+    --bg: #0f0f0f; --fg: #ffffff;
+    --card: #1e1e1e; --accent: #00e0ff;
+    --hover: #00bcd4; --neutral: #2ecc71;
+    --notif-bg: #333; --notif-fg: #fff;
+  }
+  .light {
+    --bg: #f4f4f4; --fg: #111;
+    --card: #ffffff; --accent: #0066a2;
+    --hover: #005580; --notif-bg: #eee; --notif-fg: #111;
+  }
 
-    header {
-      background-color: #2c3e50;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-    }
+  * {box-sizing:border-box;margin:0;padding:0;}
+  body {
+    font-family:'Orbitron','Inter',sans-serif;
+    background:var(--bg); color:var(--fg);
+    display:flex; min-height:100vh;
+    transition: background .3s,color .3s;
+  }
 
-    .container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 1rem;
-      padding: 1rem;
-    }
+  nav {
+    width:220px; background:#222;
+    padding:2rem 1rem; display:flex;
+    flex-direction:column; gap:1.5rem;
+    transition: background .3s;
+  }
+  nav h2 { color:var(--accent); font-size:1.4rem;}
+  nav ul {list-style:none;}
+  nav li {
+    color: var(--fg); margin:1rem 0;
+    cursor:pointer; padding:0.5rem;
+    border-radius:6px; transition:.3s;
+  }
+  nav li:hover, nav li.active {
+    background:var(--hover); color:#000;
+  }
 
-    .card {
-      background-color: white;
-      padding: 1rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
+  .main {flex:1;display:flex;flex-direction:column;}
+  header {
+    display:flex; justify-content:space-between;
+    align-items:center; padding:1rem 2rem;
+  }
+  header h1 {font-size:1.6rem;}
+  .gender-toggle button, #themeToggle {
+    background:#333;border:2px solid var(--accent);
+    color:var(--accent);padding:.5rem 1rem;
+    margin:0 .25rem;border-radius:6px;
+    cursor:pointer;transition:.2s;
+  }
+  .gender-toggle button.active, #themeToggle.active {
+    background:var(--accent); color:#000;
+  }
 
-    h2 {
-      margin-top: 0;
-    }
+  .dashboard {
+    flex:1;padding:1.5rem;
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:1.5rem; opacity:0;transition:opacity .5s;
+  }
+  .dashboard.visible {opacity:1;}
 
-    label, input, textarea, select {
-      display: block;
-      width: 100%;
-      margin-bottom: 0.5rem;
-      padding: 0.5rem;
-    }
+  .card {
+    background:var(--card);border-radius:12px;
+    padding:1.5rem;box-shadow:0 4px 12px rgba(0,0,0,0.3);
+    transition: transform .3s,box-shadow .3s;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow:0 8px 20px rgba(0,0,0,0.4);
+  }
+  .card h3 {margin-bottom:1rem;color:var(--accent);}
 
-    button {
-      padding: 0.5rem 1rem;
-      background-color: #2980b9;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
+  input,textarea,select,button {
+    width:100%;margin-bottom:0.75rem;padding:0.6rem;
+    border:none;border-radius:6px;
+    font-size:1rem;transition:.2s;
+  }
+  input,select,textarea {background:#2b2b2b;color:var(--fg);}
+  button {background:var(--accent);color:#000;font-weight:bold;cursor:pointer;}
+  button:hover {background:var(--hover);transform:scale(1.02);}
 
-    button:hover {
-      background-color: #1c5980;
-    }
+  canvas {background:#111;border-radius:8px;width:100%;}
+  .stats-grid {
+    display:grid;grid-template-columns:1fr 1fr;
+    row-gap:.5rem;
+  }
+  .stats-grid div {
+    background:#292929;padding:.8rem;border-radius:6px;
+    display:flex;justify-content:space-between;
+  }
 
-    .result {
-      margin-top: 0.5rem;
-      font-weight: bold;
-    }
-  </style>
+  #notification {
+    position:fixed;top:20px;right:20px;
+    padding:12px 20px;background:var(--notif-bg);
+    color:var(--notif-fg);border-radius:6px;
+    opacity:0;pointer-events:none;
+    transition:opacity .4s;
+  }
+
+  @media(max-width:768px){
+    nav{display:none;} header{flex-direction:column;gap:.5rem;}
+  }
+</style>
 </head>
-<body>
 
+<body>
+<nav>
+  <h2>Gym AI 🧠</h2>
+  <ul id="navList">
+    <li data-tab="metrics" class="active"><i class="fas fa-heartbeat"></i> Metrics</li>
+    <li data-tab="trackers"><i class="fas fa-list"></i> Trackers</li>
+    <li data-tab="plan"><i class="fas fa-dumbbell"></i> AI Coach</li>
+  </ul>
+  <button id="themeToggle">Toggle Theme</button>
+</nav>
+
+<div class="main">
   <header>
-    <h1>🏋️ GymPro Fitness Dashboard</h1>
-    <p>Track. Train. Transform.</p>
+    <h1>Smart AI Gym Dashboard</h1>
+    <div class="gender-toggle">
+      <button id="btnMale" onclick="toggleGender('male')">Male</button>
+      <button id="btnFemale" onclick="toggleGender('female')">Female</button>
+    </div>
   </header>
 
-  <div class="container">
-
-    <!-- BMI Calculator -->
-    <div class="card">
-      <h2>BMI Checker</h2>
-      <label for="bmi-weight">Weight (kg)</label>
-      <input type="number" id="bmi-weight">
-      <label for="bmi-height">Height (cm)</label>
-      <input type="number" id="bmi-height">
+  <!-- Metrics Tab -->
+  <div class="dashboard visible" id="metrics">
+    <!-- BMI-->
+    <div class="card"><h3>BMI Checker</h3>
+      <input type="number" id="bmiWeight" placeholder="Weight (kg)"/>
+      <input type="number" id="bmiHeight" placeholder="Height (cm)"/>
       <button onclick="calculateBMI()">Check BMI</button>
-      <p class="result" id="bmi-result"></p>
+      <div id="bmiRes" class="calc-result result"></div>
     </div>
-
-    <!-- Calorie Calculator -->
-    <div class="card">
-      <h2>Calorie Calculator</h2>
-      <label for="cal-age">Age</label>
-      <input type="number" id="cal-age">
-      <label for="cal-weight">Weight (kg)</label>
-      <input type="number" id="cal-weight">
-      <label for="cal-height">Height (cm)</label>
-      <input type="number" id="cal-height">
-      <label for="cal-activity">Activity Level</label>
-      <select id="cal-activity">
+    <!-- TDEE-->
+    <div class="card"><h3>TDEE Calculator</h3>
+      <input id="age" placeholder="Age"/>
+      <input id="weight" placeholder="Weight (kg)"/>
+      <input id="height" placeholder="Height (cm)"/>
+      <select id="activity">
         <option value="1.2">Sedentary</option>
-        <option value="1.375">Lightly active</option>
-        <option value="1.55">Moderately active</option>
-        <option value="1.725">Very active</option>
-        <option value="1.9">Extra active</option>
+        <option value="1.375">Lightly Active</option>
+        <option value="1.55">Moderately Active</option>
+        <option value="1.725">Very Active</option>
+        <option value="1.9">Extremely Active</option>
       </select>
       <button onclick="calculateCalories()">Calculate</button>
-      <p class="result" id="cal-result"></p>
+      <div id="tdeeRes" class="calc-result result"></div>
     </div>
-
-    <!-- Rep Tracker -->
-    <div class="card">
-      <h2>Rep Tracker</h2>
-      <label for="exercise-name">Exercise</label>
-      <input type="text" id="exercise-name">
-      <label for="reps-count">Reps</label>
-      <input type="number" id="reps-count">
-      <label for="sets-count">Sets</label>
-      <input type="number" id="sets-count">
-      <button onclick="logReps()">Log Reps</button>
-      <ul id="reps-log"></ul>
+    <!-- Goal -->
+    <div class="card"><h3>Weight Goal</h3>
+      <input id="currentWeight" placeholder="Current Weight"/>
+      <input id="goalWeight" placeholder="Target Weight"/>
+      <button onclick="checkGoal()">Check</button>
+      <div id="goalRes" class="result"></div>
     </div>
-
-    <!-- Meal Tracker -->
-    <div class="card">
-      <h2>Meal Tracker</h2>
-      <label for="meal">Meal Description</label>
-      <textarea id="meal" placeholder="e.g., Chicken breast + brown rice + broccoli"></textarea>
-      <button onclick="logMeal()">Log Meal</button>
-      <ul id="meal-log"></ul>
+    <!-- Muscle Tap -->
+    <div class="card svg-wrapper"><h3>Tap Muscle Areas</h3>
+      <svg id="bodySvg" viewBox="0 0 120 300">
+        <g id="maleModel">
+          <circle id="head" cx="60" cy="40" r="25"/>
+          <rect id="torso" x="45" y="65" width="30" height="70" rx="15"/>
+          <rect id="leftArm" x="15" y="75" width="30" height="15" rx="7"/>
+          <rect id="rightArm" x="75" y="75" width="30" height="15" rx="7"/>
+          <rect id="leftLeg" x="45" y="135" width="12" height="60" rx="6"/>
+          <rect id="rightLeg" x="60" y="135" width="12" height="60" rx="6"/>
+        </g>
+        <g id="femaleModel" style="display:none;">
+          <circle id="f_head" cx="60" cy="40" r="25"/>
+          <rect id="f_torso" x="45" y="65" width="30" height="70" rx="15"/>
+          <rect id="f_leftArm" x="15" y="75" width="30" height="15" rx="7"/>
+          <rect id="f_rightArm" x="75" y="75" width="30" height="15" rx="7"/>
+          <rect id="f_leftLeg" x="48" y="135" width="12" height="60" rx="6"/>
+          <rect id="f_rightLeg" x="60" y="135" width="12" height="60" rx="6"/>
+        </g>
+      </svg>
     </div>
-
-    <!-- Weight Goals -->
-    <div class="card">
-      <h2>Weight Goals</h2>
-      <label for="current-weight">Current Weight (kg)</label>
-      <input type="number" id="current-weight">
-      <label for="goal-weight">Goal Weight (kg)</label>
-      <input type="number" id="goal-weight">
-      <button onclick="checkGoal()">Check Progress</button>
-      <p class="result" id="goal-result"></p>
+    <!-- Summary -->
+    <div class="card"><h3>Muscle Summary</h3>
+      <div id="statsGrid" class="stats-grid"></div>
     </div>
-
-    <!-- Workout Plan Viewer -->
-    <div class="card">
-      <h2>Workout Plan</h2>
-      <label for="day-select">Select Day</label>
-      <select id="day-select" onchange="showPlan()">
-        <option value="Monday">Monday</option>
-        <option value="Tuesday">Tuesday</option>
-        <option value="Wednesday">Wednesday</option>
-        <option value="Thursday">Thursday</option>
-        <option value="Friday">Friday</option>
-      </select>
-      <p id="plan-output"></p>
-    </div>
-
-    <!-- Water Tracker -->
-    <div class="card">
-      <h2>Water Intake Tracker</h2>
-      <label for="water-intake">Cups of Water Today</label>
-      <input type="number" id="water-intake">
-      <button onclick="logWater()">Log Water</button>
-      <p class="result" id="water-result"></p>
-    </div>
-
   </div>
 
-  <script>
-    function calculateBMI() {
-      const weight = parseFloat(document.getElementById('bmi-weight').value);
-      const height = parseFloat(document.getElementById('bmi-height').value) / 100;
-      if (!weight || !height) return;
-      const bmi = (weight / (height * height)).toFixed(2);
-      let status = '';
-      if (bmi < 18.5) status = 'Underweight';
-      else if (bmi < 25) status = 'Normal weight';
-      else if (bmi < 30) status = 'Overweight';
-      else status = 'Obese';
-      document.getElementById('bmi-result').textContent = `Your BMI is ${bmi} (${status})`;
-    }
+  <!-- Trackers Tab -->
+  <div class="dashboard hidden" id="trackers">
+    <div class="card"><h3>Rep Tracker</h3>
+      <input id="exName" placeholder="Exercise"/>
+      <input type="number" id="reps" placeholder="Reps"/>
+      <input type="number" id="sets" placeholder="Sets"/>
+      <button onclick="addReps()">Log Reps</button>
+      <ul id="repsLog"></ul>
+    </div>
+    <div class="card"><h3>Meal Tracker</h3>
+      <textarea id="meal" placeholder="Meal description"></textarea>
+      <button onclick="logMeal()">Log Meal</button>
+      <ul id="mealLog"></ul>
+    </div>
+    <div class="card"><h3>Water Tracker</h3>
+      <input type="number" id="waterIntake" placeholder="Cups"/>
+      <button onclick="logWater()">Log Water</button>
+      <div id="waterRes" class="result"></div>
+    </div>
+    <div class="card"><h3>Progress Chart</h3>
+      <canvas id="progressChart" width="400" height="300"></canvas>
+    </div>
+  </div>
 
-    function calculateCalories() {
-      const age = +document.getElementById('cal-age').value;
-      const weight = +document.getElementById('cal-weight').value;
-      const height = +document.getElementById('cal-height').value;
-      const activity = +document.getElementById('cal-activity').value;
-      if (!age || !weight || !height) return;
+  <!-- AI Coach Tab -->
+  <div class="dashboard hidden" id="plan">
+    <div class="card"><h3>AI Coach</h3>
+      <input id="goalInput" placeholder="Your fitness goal"/>
+      <button onclick="askAI('meals')">Get Meal Plan</button>
+      <button onclick="askAI('workouts')">Get Workout Plan</button>
+      <div id="aiRes" class="ai-result"></div>
+    </div>
+  </div>
 
-      // Harris-Benedict Equation (male assumed)
-      const bmr = 10 * weight + 6.25 * height - 5 * age + 5;
-      const tdee = bmr * activity;
+  <div id="notification"></div>
+</div>
 
-      const goal = tdee > 2500 ? "Cut" : tdee < 2000 ? "Bulk" : "Maintain";
-      document.getElementById('cal-result').textContent =
-        `Your TDEE is ${Math.round(tdee)} kcal/day. Recommended goal: ${goal}`;
-    }
+<script>
+let currentGender="male";
+let lastTDEE=0;
+const muscles = {};
+["head","torso","leftArm","rightArm","leftLeg","rightLeg","f_head","f_torso","f_leftArm","f_rightArm","f_leftLeg","f_rightLeg"].forEach(id=>muscles[id]=0);
 
-    function logReps() {
-      const exercise = document.getElementById('exercise-name').value;
-      const reps = document.getElementById('reps-count').value;
-      const sets = document.getElementById('sets-count').value;
-      if (exercise && reps && sets) {
-        const li = document.createElement('li');
-        li.textContent = `${exercise}: ${sets} sets of ${reps} reps`;
-        document.getElementById('reps-log').appendChild(li);
-      }
-    }
+function showNotification(msg){
+  const el = document.getElementById("notification");
+  el.innerText = msg; el.style.opacity=1;
+  setTimeout(()=>el.style.opacity=0, 2000);
+}
 
-    function logMeal() {
-      const meal = document.getElementById('meal').value;
-      if (meal) {
-        const li = document.createElement('li');
-        li.textContent = meal;
-        document.getElementById('meal-log').appendChild(li);
-        document.getElementById('meal').value = '';
-      }
-    }
+function toggleGender(g){
+  currentGender=g;
+  document.getElementById("maleModel").style.display=g==="male"?"block":"none";
+  document.getElementById("femaleModel").style.display=g==="female"?"block":"none";
+  document.getElementById("btnMale").classList.toggle("active",g==="male");
+  document.getElementById("btnFemale").classList.toggle("active",g==="female");
+  updateStats();
+  showNotification(`Gender set to ${g}`);
+}
 
-    function checkGoal() {
-      const current = +document.getElementById('current-weight').value;
-      const goal = +document.getElementById('goal-weight').value;
-      if (!current || !goal) return;
-      const status = current > goal ? 'You need to cut.' :
-                     current < goal ? 'You need to bulk.' :
-                     'You are at your goal weight!';
-      document.getElementById('goal-result').textContent = status;
-    }
+function getColor(cnt){
+  if(cnt===0)return"#ccc";
+  if(cnt<=2)return"lightgreen";
+  if(cnt<=4)return"orange";
+  return"red";
+}
 
-    const workoutPlans = {
-      Monday: 'Push Day: Bench Press, Shoulder Press, Tricep Dips',
-      Tuesday: 'Pull Day: Deadlifts, Pull-ups, Bicep Curls',
-      Wednesday: 'Leg Day: Squats, Lunges, Calf Raises',
-      Thursday: 'HIIT & Core: Burpees, Plank, Russian Twists',
-      Friday: 'Full Body: Kettlebell Swings, Jump Squats, Rows'
-    };
+document.querySelectorAll("svg rect, svg circle").forEach(el=>{
+  el.style.fill="#ccc";el.style.stroke="#444";el.style.strokeWidth="2";
+  el.addEventListener("click",()=>{
+    muscles[el.id]++;
+    el.style.fill=getColor(muscles[el.id]);
+    updateStats();
+    showNotification(`${el.id.replace('f_','')} +1 set`);
+  });
+});
 
-    function showPlan() {
-      const day = document.getElementById('day-select').value;
-      document.getElementById('plan-output').textContent = workoutPlans[day];
-    }
+function updateStats(){
+  const grid=document.getElementById("statsGrid");
+  grid.innerHTML="";
+  Object.keys(muscles)
+    .filter(id => currentGender==="male"? !id.startsWith("f_") : id.startsWith("f_"))
+    .forEach(id => {
+      const part = id.replace("f_","").replace(/([A-Z])/g," $1");
+      grid.innerHTML+=`<div><span>${part}</span><span>${muscles[id]} sets</span></div>`;
+    });
+}
 
-    function logWater() {
-      const cups = document.getElementById('water-intake').value;
-      if (cups) {
-        document.getElementById('water-result').textContent = `You've logged ${cups} cups today! 💧`;
-      }
-    }
-  </script>
+toggleGender("male");
 
+function calculateBMI(){
+  const w=+bmiWeight.value, h=+bmiHeight.value/100;
+  if(!w||!h) return;
+  const bmi=(w/(h*h)).toFixed(1);
+  const s = bmi<18.5?"Underweight":bmi<25?"Normal":bmi<30?"Overweight":"Obese";
+  bmiRes.innerText=`${bmi} (${s})`;
+  showNotification(`BMI: ${bmi}`);
+}
+
+function calculateCalories(){
+  const age=+age.value, w=+weight.value, h=+height.value, act=+activity.value;
+  if(!age||!w||!h) return;
+  const bmr = currentGender==="male"?10*w+6.25*h-5*age+5:10*w+6.25*h-5*age-161;
+  lastTDEE=Math.round(bmr*act);
+  tdeeRes.innerText=`${lastTDEE} kcal`;
+  showNotification(`TDEE: ${lastTDEE}`);
+}
+
+function checkGoal(){
+  const c=+currentWeight.value, g=+goalWeight.value; if(!c||!g) return;
+  const msg = c>g?"Cut down 🪓":"Bulk up 🚀";
+  goalRes.innerText = msg;
+  showNotification(msg);
+}
+
+const ctx = progressChart.getContext('2d');
+const labels=[], repsData=[], waterData=[];
+const progChart = new Chart(ctx, {
+  type:'line',
+  data:{labels, datasets:[
+    { label:'Reps', data:repsData, borderColor:'var(--accent)', tension:0.3 },
+    { label:'Water Cups', data:waterData, borderColor:'var(--neutral)', tension:0.3 }
+  ]},
+  options:{responsive:true, scales:{y:{beginAtZero:true}}}
+});
+
+function addReps(){
+  const ex=exName.value, r=+reps.value, s=+sets.value; if(!ex||!r||!s) return;
+  repsLog.innerHTML+=`<li>${ex}: ${s}×${r}</li>`;
+  labels.push(ex);
+  repsData.push(r*s);
+  waterData.push(null);
+  progChart.update();
+  showNotification("Logged reps");
+}
+
+function logMeal(){
+  const m=meal.value.trim(); if(!m) return;
+  mealLog.innerHTML+=`<li>${m}</li>`; meal.value='';
+  showNotification("Meal logged");
+}
+
+function logWater(){
+  const c=+waterIntake.value; if(!c) return;
+  waterRes.innerText=`${c} cups today`;
+  labels.push(new Date().toLocaleDateString());
+  waterData.push(c);
+  repsData.push(null);
+  progChart.update();
+  showNotification("Water logged");
+}
+
+async function askAI(type){
+  const g=goalInput.value.trim(); if(!g) return;
+  const worked = Object.entries(muscles).filter(([id,c])=>c>0 && (currentGender==="male"?!id.startsWith("f_"):id.startsWith("f_")));
+  const ml = worked.map(([id,c])=>`${id.replace('f_','')}(${c})`).join(", ");
+  const prompt = type==="meals"? `Goal: ${g}. Suggest meals.` : `Goal: ${g}. Worked: ${ml}. Suggest workout.`;
+  aiRes.innerText="Thinking...";
+  try{
+    const res = await fetch("", {
+      method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":"Bearer YOUR_API_KEY"},
+      body:JSON.stringify({model:"gpt-3.5-turbo",messages:[{role:"user",content:prompt}],temperature:0.7})
+    });
+    const data = await res.json();
+    aiRes.innerText = data.choices?.[0]?.message?.content || "No response";
+  }catch{aiRes.innerText="AI failed";}
+}
+
+navList.addEventListener("click", e => {
+  const li = e.target.closest("li");
+  if(!li) return;
+  document.querySelectorAll("nav li").forEach(n=>n.classList.remove("active"));
+  li.classList.add("active");
+  document.querySelectorAll(".dashboard").forEach(d=>d.classList.add("hidden"));
+  const tab = li.dataset.tab;
+  document.getElementById(tab).classList.add("visible");
+  document.getElementById(tab).classList.remove("hidden");
+});
+
+themeToggle.addEventListener("click", () => {
+  document.body.classList.toggle("light");
+  themeToggle.classList.toggle("active");
+  showNotification("Theme toggled");
+});
+</script>
 </body>
 </html>

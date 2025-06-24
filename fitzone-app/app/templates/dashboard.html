@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🏋️ FITZONE Dashboard</title>
+
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --card: #1e1e1e;
+      --accent: #00e0ff;
+      --text: #ffffff;
+      --hover: #00bcd4;
+      --nav-bg: #161616;
+      --active: #00ff99;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--nav-bg), var(--card));
+      padding: 20px;
+      text-align: center;
+      border-bottom: 2px solid var(--accent);
+      box-shadow: 0 4px 20px rgba(0,224,255,0.3);
+    }
+
+    .header h1 {
+      color: var(--accent);
+      margin-bottom: 20px;
+      font-size: 2.5rem;
+      text-shadow: 0 0 20px rgba(0,224,255,0.5);
+    }
+
+    .nav-menu {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      padding: 10px 0;
+    }
+
+    .nav-item {
+      background: var(--card);
+      border: 2px solid transparent;
+      border-radius: 12px;
+      padding: 15px 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      min-width: 120px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0,224,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .nav-item:hover::before {
+      left: 100%;
+    }
+
+    .nav-item:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0,224,255,0.4);
+    }
+
+    .nav-item.active {
+      border-color: var(--active);
+      background: linear-gradient(135deg, var(--card), rgba(0,255,153,0.1));
+      box-shadow: 0 8px 25px rgba(0,255,153,0.3);
+    }
+
+    .nav-icon {
+      font-size: 2rem;
+      color: var(--accent);
+      transition: color 0.3s ease;
+    }
+
+    .nav-item.active .nav-icon {
+      color: var(--active);
+    }
+
+    .nav-label {
+      font-size: 0.9rem;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .main-container {
+      padding: 30px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .content-frame {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 0 30px rgba(0,224,255,0.2);
+      border: 1px solid rgba(0,224,255,0.3);
+      min-height: 500px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .content-frame::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--active), var(--accent));
+      border-radius: 16px 16px 0 0;
+    }
+
+    .section {
+      display: none;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+      margin-bottom: 1.5rem;
+      color: var(--accent);
+      font-size: 1.8rem;
+      text-align: center;
+      text-shadow: 0 0 10px rgba(0,224,255,0.5);
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+      font-weight: bold;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      background: #2b2b2b;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 10px rgba(0,224,255,0.3);
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, var(--accent), var(--hover));
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      color: #000;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 1rem;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,224,255,0.4);
+    }
+
+    .result {
+      margin-top: 1rem;
+      padding: 15px;
+      background: rgba(0,224,255,0.1);
+      border-radius: 8px;
+      border-left: 4px solid var(--accent);
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    ul {
+      list-style: none;
+      margin-top: 1rem;
+    }
+
+    ul li {
+      background: rgba(0,255,153,0.1);
+      margin: 8px 0;
+      padding: 12px;
+      border-radius: 6px;
+      border-left: 3px solid var(--active);
+    }
+
+    canvas {
+      background: #111;
+      border-radius: 8px;
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    #tooltip {
+      position: fixed;
+      background: rgba(0, 0, 0, 0.9);
+      color: var(--active);
+      padding: 8px 12px;
+      border-radius: 6px;
+      pointer-events: none;
+      font-family: monospace;
+      font-size: 0.9rem;
+      transition: opacity 0.3s;
+      z-index: 1000;
+      border: 1px solid var(--active);
+    }
+
+    .welcome-section {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .welcome-section h2 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, var(--accent), var(--active));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .welcome-section p {
+      font-size: 1.2rem;
+      opacity: 0.8;
+      line-height: 1.6;
+    }
+
+    .two-column {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .nav-menu {
+        gap: 10px;
+      }
+      
+      .nav-item {
+        min-width: 100px;
+        padding: 12px 15px;
+      }
+      
+      .nav-icon {
+        font-size: 1.5rem;
+      }
+      
+      .nav-label {
+        font-size: 0.8rem;
+      }
+
+      .two-column {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/konva@9.3.13/konva.min.js"></script>
+</head>
+<body>
+  <header class="header">
+    <h1>🏋️ FITZONE Dashboard</h1>
+    <nav class="nav-menu">
+      <div class="nav-item active" onclick="showSection('welcome')">
+        <div class="nav-icon">🏠</div>
+        <div class="nav-label">Home</div>
+      </div>
+      <div class="nav-item" onclick="showSection('bmi')">
+        <div class="nav-icon">⚖️</div>
+        <div class="nav-label">BMI</div>
+      </div>
+      <div class="nav-item" onclick="showSection('calories')">
+        <div class="nav-icon">🔥</div>
+        <div class="nav-label">Calories</div>
+      </div>
+      <div class="nav-item" onclick="showSection('reps')">
+        <div class="nav-icon">💪</div>
+        <div class="nav-label">Rep Tracker</div>
+      </div>
+      <div class="nav-item" onclick="showSection('meals')">
+        <div class="nav-icon">🍽️</div>
+        <div class="nav-label">Meals</div>
+      </div>
+      <div class="nav-item" onclick="showSection('goals')">
+        <div class="nav-icon">🎯</div>
+        <div class="nav-label">Goals</div>
+      </div>
+      <div class="nav-item" onclick="showSection('workout')">
+        <div class="nav-icon">📅</div>
+        <div class="nav-label">Workout</div>
+      </div>
+      <div class="nav-item" onclick="showSection('water')">
+        <div class="nav-icon">💧</div>
+        <div class="nav-label">Water</div>
+      </div>
+      <div class="nav-item" onclick="showSection('progress')">
+        <div class="nav-icon">📊</div>
+        <div class="nav-label">Progress</div>
+      </div>
+      <div class="nav-item" onclick="showSection('muscles')">
+        <div class="nav-icon">🏋️</div>
+        <div class="nav-label">Muscles</div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="main-container">
+    <div class="content-frame">
+      <!-- Welcome Section -->
+      <section id="welcome" class="section active">
+        <div class="welcome-section">
+          <h2>Welcome to FITZONE</h2>
+          <p>Your ultimate fitness companion! Select any tool from the menu above to track your progress, plan your workouts, and achieve your fitness goals.</p>
+          <p>Get started by clicking on one of the icons above to access different features.</p>
+        </div>
+      </section>
+
+      <!-- BMI Section -->
+      <section id="bmi" class="section">
+        <h2>BMI Checker</h2>
+        <div class="two-column">
+          <div>
+            <form id="bmi-form" method="post">
+              <div class="form-group">
+                <label for="weight">Weight (kg):</label>
+                <input type="number" step="0.1" id="weight" name="weight" value="{{ user.weight or '' }}" required />
+              </div>
+              <div class="form-group">
+                <label for="height">Height (cm):</label>
+                <input type="number" step="0.1" id="height" name="height" value="{{ user.height or '' }}" required />
+              </div>
+              <button type="submit" name="bmi_submit">Save & Calculate BMI</button>
+            </form>
+            <button onclick="calculateBMI()">Calculate BMI</button>
+          </div>
+          <div>
+            <div id="bmi-result" class="result">
+              {% if user.bmi %}
+                Your last saved BMI is <strong>{{ user.bmi }}</strong>.
+              {% else %}
+                Enter your details to calculate BMI.
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Calories Section -->
+      <section id="calories" class="section">
+        <h2>Daily Calorie Calculator</h2>
+        <div class="two-column">
+          <div>
+            <form method="POST">
+              <div class="form-group">
+                <label for="cal-age">Age</label>
+                <input type="number" id="cal-age" name="age" value="{{ user.age or '' }}" placeholder="Enter your age" min="0" required />
+              </div>
+              <div class="form-group">
+                <label for="cal-weight">Weight (kg)</label>
+                <input type="number" id="cal-weight" name="c_weight" value="{{ user.weight or '' }}" placeholder="Enter your weight" min="0" step="0.1" required />
+              </div>
+              <div class="form-group">
+                <label for="cal-height">Height (cm)</label>
+                <input type="number" id="cal-height" name="c_height" value="{{ user.height or '' }}" placeholder="Enter your height" min="0" step="0.1" required />
+              </div>
+              <div class="form-group">
+                <label for="cal-activity">Activity Level</label>
+                <select id="cal-activity" name="activity" required>
+                  <option value="1.2" {% if user.activity_level == 1.2 %}selected{% endif %}>Sedentary</option>
+                  <option value="1.375" {% if user.activity_level == 1.375 %}selected{% endif %}>Lightly active</option>
+                  <option value="1.55" {% if user.activity_level == 1.55 %}selected{% endif %}>Moderately active</option>
+                  <option value="1.725" {% if user.activity_level == 1.725 %}selected{% endif %}>Very active</option>
+                  <option value="1.9" {% if user.activity_level == 1.9 %}selected{% endif %}>Extra active</option>
+                </select>
+              </div>
+              <button type="submit" name="calorie_submit">Save Calories</button>
+            </form>
+            <button onclick="calculateCalories()">Calculate TDEE</button>
+          </div>
+          <div>
+            <div class="result" id="cal-result">
+              {% if user.tdee %}
+                Your last calculated daily requirement is <strong>{{ user.tdee }} kcal</strong>.
+              {% else %}
+                Enter your details to calculate daily calories.
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Rep Tracker Section -->
+      <section id="reps" class="section">
+        <h2>Rep Tracker</h2>
+        <div class="two-column">
+          <div>
+            <form method="POST">
+              <div class="form-group">
+                <label for="exercise-name">Exercise</label>
+                <input type="text" id="exercise-name" name="exercise" value="{{ user.last_exercise_name or '' }}" placeholder="Exercise name" required />
+              </div>
+              <div class="form-group">
+                <label for="reps-count">Reps</label>
+                <input type="number" id="reps-count" name="reps" value="{{ user.last_reps or '' }}" placeholder="Number of reps" min="0" required />
+              </div>
+              <div class="form-group">
+                <label for="sets-count">Sets</label>
+                <input type="number" id="sets-count" name="sets" value="{{ user.last_sets or '' }}" placeholder="Number of sets" min="0" required />
+              </div>
+              <button type="submit" name="exercise_submit">Log Exercise</button>
+            </form>
+          </div>
+          <div>
+            <h3 style="color: var(--accent); margin-bottom: 1rem;">Recent Exercise Log</h3>
+            <ul id="reps-log">
+              {% for log in exercise_logs %}
+                <li>{{ log.exercise_name }}: {{ log.sets }} sets × {{ log.reps }} reps = {{ log.total_reps }} total reps</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Meals Section -->
+      <section id="meals" class="section">
+        <h2>Meal Tracker</h2>
+        <div class="two-column">
+          <div>
+            <form method="POST">
+              <div class="form-group">
+                <label for="meal">Meal Description</label>
+                <textarea id="meal" name="meal" placeholder="e.g., Chicken breast + brown rice + vegetables" rows="4" required>{{ user.last_meal_description or '' }}</textarea>
+              </div>
+              <button type="submit" name="meal_submit">Log Meal</button>
+            </form>
+          </div>
+          <div>
+            <h3 style="color: var(--accent); margin-bottom: 1rem;">Today's Meals</h3>
+            <ul id="meal-log">
+              {% for log in meal_logs %}
+                <li><strong>{{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}:</strong> {{ log.meal_description }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Weight Goals Section -->
+      <section id="goals" class="section">
+        <h2>Weight Goals Tracker</h2>
+        <div class="two-column">
+          <div>
+            <form method="POST">
+              <div class="form-group">
+                <label for="current-weight">Current Weight (kg)</label>
+                <input type="number" id="current-weight" name="current_weight" value="{{ user.current_weight or '' }}" placeholder="Current weight" min="0" step="0.1" required />
+              </div>
+              <div class="form-group">
+                <label for="goal-weight">Goal Weight (kg)</label>
+                <input type="number" id="goal-weight" name="goal_weight" value="{{ user.goal_weight or '' }}" placeholder="Goal weight" min="0" step="0.1" required />
+              </div>
+              <button type="submit" name="goal_submit">Save Goal</button>
+            </form>
+          </div>
+          <div>
+            <div class="result" id="goal-result">
+              {% if user.goal_weight and user.current_weight %}
+                Your goal is <strong>{{ user.goal_weight }} kg</strong>. You are currently <strong>{{ user.current_weight }} kg</strong>.
+              {% else %}
+                Set your current and goal weight to track progress.
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Workout Plan Section -->
+      <section id="workout" class="section">
+        <h2>Weekly Workout Plan</h2>
+        <div class="form-group">
+          <label for="day-select">Select Day</label>
+          <select id="day-select" onchange="showPlan()">
+            <option>Monday</option>
+            <option>Tuesday</option>
+            <option>Wednesday</option>
+            <option>Thursday</option>
+            <option>Friday</option>
+          </select>
+        </div>
+        <div class="result" id="plan-output">Select a day to view your workout plan</div>
+      </section>
+
+      <!-- Water Tracker Section -->
+      <section id="water" class="section">
+        <h2>Water Intake Tracker</h2>
+        <div class="two-column">
+          <div>
+            <form method="POST">
+              <div class="form-group">
+                <label for="water-intake">Cups of Water Today</label>
+                <input type="number" id="water-intake" name="cups" value="{{ user.last_water_cups or '' }}" placeholder="Number of cups" min="0" required />
+              </div>
+              <button type="submit" name="water_submit">Log Water</button>
+            </form>
+          </div>
+          <div>
+            <div class="result" id="water-result">
+              <h3 style="color: var(--accent); margin-bottom: 1rem;">Recent Water Log</h3>
+              <ul id="water-log">
+                {% for log in water_logs %}
+                  <li><strong>{{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}:</strong> {{ log.cups }} cups</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Progress Chart Section -->
+      <section id="progress" class="section">
+        <h2>Progress Chart</h2>
+        <canvas id="progressChart" width="400" height="300"></canvas>
+      </section>
+
+      <!-- Muscle Focus Section -->
+      <section id="muscles" class="section">
+        <h2>Muscle Focus Viewer</h2>
+        <p style="text-align: center; margin-bottom: 20px;">Select a workout day to see targeted muscle groups</p>
+        <div class="form-group">
+          <label for="muscle-day-select">Select Day</label>
+          <select id="muscle-day-select" onchange="highlightMuscles(this.value)">
+            <option>Monday</option>
+            <option>Tuesday</option>
+            <option>Wednesday</option>
+            <option>Thursday</option>
+            <option>Friday</option>
+          </select>
+        </div>
+        <div id="muscle-stage" style="width: 100%; height: 400px;"></div>
+        <div id="tooltip" class="tooltip" style="opacity:0;"></div>
+      </section>
+
+      <!-- <form action="{{ url_for('logout') }}">
+        <button type="submit" style="background-color: #d63031; color: #fff;">Logout</button>
+      </form> -->
+    </div>
+  </main>
+
+  <script>
+    // Navigation functionality
+    function showSection(sectionId) {
+      // Hide all sections
+      document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+      });
+
+      // Remove active class from all nav items
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+
+      // Show selected section
+      const section = document.getElementById(sectionId);
+      if (section) {
+        section.classList.add('active');
+      } else {
+        console.error(`Section with ID ${sectionId} not found`);
+        return;
+      }
+
+      // Add active class to clicked nav item
+      const navItem = event.target.closest('.nav-item');
+      if (navItem) {
+        navItem.classList.add('active');
+      }
+
+      // Initialize specific sections
+      try {
+        if (sectionId === 'progress' && !chart) {
+          initProgressChart();
+        } else if (sectionId === 'muscles' && !stage) {
+          initMuscleViewer();
+        } else if (sectionId === 'workout') {
+          showPlan();
+        }
+      } catch (error) {
+        console.error(`Error initializing section ${sectionId}:`, error);
+      }
+    }
+
+    // BMI Calculator
+    function calculateBMI() {
+      const w = parseFloat(document.getElementById('weight').value);
+      const h = parseFloat(document.getElementById('height').value) / 100;
+      const resultDiv = document.getElementById('bmi-result');
+      
+      if (!w || !h || w <= 0 || h <= 0) {
+        resultDiv.textContent = 'Please enter valid weight and height values';
+        return;
+      }
+      
+      const bmi = (w / (h * h)).toFixed(2);
+      let status = bmi < 18.5 ? 'Underweight' :
+                   bmi < 25 ? 'Normal Weight' :
+                   bmi < 30 ? 'Overweight' : 'Obese';
+      let color = bmi < 18.5 ? '#ff6b6b' :
+                  bmi < 25 ? '#51cf66' :
+                  bmi < 30 ? '#ffd43b' : '#ff6b6b';
+      
+      resultDiv.innerHTML = `
+        <div style="color: ${color};">Your BMI is <strong>${bmi}</strong></div>
+        <div>Category: <strong>${status}</strong></div>
+      `;
+    }
+
+    // Calorie Calculator
+    function calculateCalories() {
+      const age = parseFloat(document.getElementById('cal-age').value);
+      const w = parseFloat(document.getElementById('cal-weight').value);
+      const h = parseFloat(document.getElementById('cal-height').value);
+      const act = parseFloat(document.getElementById('cal-activity').value);
+      const resultDiv = document.getElementById('cal-result');
+      
+      if (!age || !w || !h || age <= 0 || w <= 0 || h <= 0) {
+        resultDiv.textContent = 'Please enter valid age, weight, and height';
+        return;
+      }
+      
+      const bmr = 10 * w + 6.25 * h - 5 * age + 5;
+      const tdee = Math.round(bmr * act);
+      const goal = tdee > 2500 ? 'Consider cutting calories for weight loss' :
+                   tdee < 2000 ? 'Consider increasing calories for weight gain' :
+                   'Maintain current intake for weight maintenance';
+      
+      resultDiv.innerHTML = `
+        <div>Daily Calories (TDEE): <strong>${tdee} kcal</strong></div>
+        <div style="margin-top: 10px;">${goal}</div>
+      `;
+    }
+
+    // Progress Chart Variables
+    const labels = [], repsArr = [], weightArr = [];
+    let chart;
+
+    function initProgressChart() {
+      const canvas = document.getElementById('progressChart');
+      if (!canvas) {
+        console.error('ProgressChart canvas not found');
+        return;
+      }
+
+      if (chart) return;
+
+      const ctx = canvas.getContext('2d');
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Total Reps',
+              data: repsArr,
+              borderColor: '#00e0ff',
+              backgroundColor: 'rgba(0,224,255,0.1)',
+              tension: 0.3,
+              fill: true
+            },
+            {
+              label: 'Weight Goals',
+              data: weightArr,
+              borderColor: '#00ff99',
+              backgroundColor: 'rgba(0,255,153,0.1)',
+              tension: 0.3,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { color: '#000000' }
+            },
+            title: {
+              display: true,
+              text: 'Workout & Weight Progress Over Time',
+              color: '#00e0ff'
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { color: '#ffffff' },
+              grid: { color: 'rgba(255,255,255,0.1)' }
+            },
+            x: {
+              ticks: { color: '#ffffff' },
+              grid: { color: 'rgba(255,255,255,0.1)' }
+            }
+          }
+        }
+      });
+    }
+
+    // Rep Tracker
+    function logReps() {
+      const ex = document.getElementById('exercise-name').value.trim();
+      const r = parseInt(document.getElementById('reps-count').value);
+      const s = parseInt(document.getElementById('sets-count').value);
+      
+      if (!ex || !r || !s || r <= 0 || s <= 0) {
+        alert('Please enter a valid exercise name and positive numbers for reps and sets');
+        return;
+      }
+      
+      document.getElementById('reps-log').innerHTML += `<li>${ex}: ${s} sets × ${r} reps = ${s * r} total reps</li>`;
+      labels.push(ex);
+      repsArr.push(r * s);
+      weightArr.push(null);
+      if (chart) chart.update();
+      
+      document.getElementById('exercise-name').value = '';
+      document.getElementById('reps-count').value = '';
+      document.getElementById('sets-count').value = '';
+    }
+
+    // Meal Tracker
+    function logMeal() {
+      const meal = document.getElementById('meal').value.trim();
+      if (!meal) {
+        alert('Please enter a meal description');
+        return;
+      }
+      
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('meal-log').innerHTML += `<li><strong>${time}</strong>: ${meal}</li>`;
+      document.getElementById('meal').value = '';
+    }
+
+    // Weight Goals
+    function checkGoal() {
+      const current = parseFloat(document.getElementById('current-weight').value);
+      const goal = parseFloat(document.getElementById('goal-weight').value);
+      const resultDiv = document.getElementById('goal-result');
+      
+      if (!current || !goal || current <= 0 || goal <= 0) {
+        resultDiv.textContent = 'Please enter valid current and goal weights';
+        return;
+      }
+      
+      const diff = Math.abs(current - goal);
+      const msg = current > goal ?
+        `You need to lose ${diff.toFixed(1)} kg to reach your goal` :
+        current < goal ?
+        `You need to gain ${diff.toFixed(1)} kg to reach your goal` :
+        'Congratulations! You\'re at your goal weight!';
+      
+      resultDiv.innerHTML = `
+        <div><strong>${msg}</strong></div>
+        <div style="margin-top: 10px;">Current: ${current} kg | Goal: ${goal} kg</div>
+      `;
+      
+      labels.push('Weight Goal');
+      repsArr.push(null);
+      weightArr.push(goal);
+      if (chart) chart.update();
+    }
+
+    // Workout Plans
+    const plans = {
+      Monday: 'Push Day: Bench Press, Shoulder Press, Tricep Dips, Push-ups',
+      Tuesday: 'Pull Day: Deadlifts, Pull-ups, Barbell Rows, Bicep Curls',
+      Wednesday: 'Leg Day: Squats, Lunges, Calf Raises, Leg Press',
+      Thursday: 'HIIT & Core: Burpees, Mountain Climbers, Planks, Russian Twists',
+      Friday: 'Full Body: Kettlebell Swings, Jump Squats, Battle Ropes, Thrusters'
+    };
+
+    function showPlan() {
+      const daySelect = document.getElementById('day-select');
+      if (!daySelect) return;
+      
+      const day = daySelect.value;
+      const planOutput = document.getElementById('plan-output');
+      
+      if (!plans[day]) {
+        planOutput.textContent = 'No workout plan available for this day';
+        return;
+      }
+      
+      planOutput.innerHTML = `
+        <div><strong>${day} Workout:</strong></div>
+        <div style="margin-top: 10px;">${plans[day]}</div>
+      `;
+    }
+
+    // Water Tracker
+    function logWater() {
+      const cups = parseInt(document.getElementById('water-intake').value);
+      const resultDiv = document.getElementById('water-result');
+      
+      if (!cups || cups <= 0) {
+        resultDiv.textContent = 'Please enter a valid number of cups';
+        return;
+      }
+      
+      const percentage = Math.min((cups / 8) * 100, 100);
+      const status = cups >= 8 ? 'Great job! You\'ve met your daily goal!' :
+                     cups >= 6 ? 'Almost there! Just a few more cups.' :
+                     'Keep drinking! You need more water today.';
+      
+      resultDiv.innerHTML = `
+        <div><strong>${cups} cups logged today 💧</strong></div>
+        <div style="margin-top: 10px;">Progress: ${percentage.toFixed(1)}% of daily goal</div>
+        <div style="margin-top: 5px;">${status}</div>
+      `;
+      
+      document.getElementById('water-intake').value = '';
+    }
+
+    // Muscle Viewer with Konva
+    const dayToMuscles = {
+      Monday: ['chest', 'triceps', 'shoulders'],
+      Tuesday: ['back', 'biceps'],
+      Wednesday: ['quads', 'calves'],
+      Thursday: ['core', 'chest', 'back'],
+      Friday: ['shoulders', 'core', 'quads', 'biceps']
+    };
+
+    let stage, layer, muscleShapes = {};
+
+    function initMuscleViewer() {
+      if (stage) return;
+
+      const container = document.getElementById('muscle-stage');
+      if (!container) {
+        console.error('Muscle stage container not found');
+        return;
+      }
+
+      stage = new Konva.Stage({
+        container: 'muscle-stage',
+        width: container.offsetWidth || 400,
+        height: 400,
+        draggable: true
+      });
+      layer = new Konva.Layer();
+      stage.add(layer);
+
+      const muscleDefs = {
+        chest: { draw: () => new Konva.Ellipse({ x: 200, y: 120, radiusX: 80, radiusY: 40 }), tooltip: 'Chest: Bench Press, Push-ups' },
+        back: { draw: () => new Konva.Rect({ x: 160, y: 160, width: 80, height: 120 }), tooltip: 'Back: Deadlifts, Rows' },
+        biceps: { draw: () => new Konva.Circle({ x: 130, y: 100, radius: 25 }), tooltip: 'Biceps: Curls, Pull-ups' },
+        triceps: { draw: () => new Konva.Circle({ x: 270, y: 100, radius: 25 }), tooltip: 'Triceps: Dips, Close-grip Press' },
+        quads: { draw: () => new Konva.Rect({ x: 170, y: 260, width: 60, height: 100 }), tooltip: 'Quads: Squats, Lunges' },
+        calves: { draw: () => new Konva.Rect({ x: 180, y: 340, width: 40, height: 50 }), tooltip: 'Calves: Calf Raises' },
+        shoulders: { draw: () => new Konva.RegularPolygon({ x: 200, y: 70, sides: 3, radius: 30 }), tooltip: 'Shoulders: Overhead Press' },
+        core: { draw: () => new Konva.Ellipse({ x: 200, y: 180, radiusX: 50, radiusY: 60 }), tooltip: 'Core: Planks, Crunches' }
+      };
+
+      const tooltipDiv = document.getElementById('tooltip');
+
+      for (const [id, def] of Object.entries(muscleDefs)) {
+        const shape = def.draw();
+        shape.id(id);
+        shape.fill('#444');
+        shape.listening(true);
+        layer.add(shape);
+        muscleShapes[id] = shape;
+
+        shape.on('mouseover', () => {
+          tooltipDiv.style.opacity = 1;
+          tooltipDiv.innerHTML = def.tooltip;
+          shape.to({ scaleX: 1.1, scaleY: 1.1, duration: 0.2 });
+        });
+
+        shape.on('mousemove', e => {
+          tooltipDiv.style.left = e.evt.clientX + 10 + 'px';
+          tooltipDiv.style.top = e.evt.clientY + 10 + 'px';
+        });
+
+        shape.on('mouseout', () => {
+          tooltipDiv.style.opacity = 0;
+          shape.to({ scaleX: 1, scaleY: 1, duration: 0.2 });
+        });
+      }
+
+      layer.draw();
+
+      const muscleDaySelect = document.getElementById('muscle-day-select');
+      if (muscleDaySelect) {
+        highlightMuscles(muscleDaySelect.value);
+      }
+    }
+
+    function highlightMuscles(day) {
+      if (!muscleShapes || Object.keys(muscleShapes).length === 0) return;
+      
+      const targets = dayToMuscles[day] || [];
+      for (const [id, shape] of Object.entries(muscleShapes)) {
+        shape.to({
+          fill: targets.includes(id) ? '#00ff99' : '#444',
+          duration: 0.5
+        });
+      }
+      if (layer) layer.draw();
+    }
+
+    // Initialize workout plan on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const hash = window.location.hash.substring(1);
+      if (hash) {
+        const navItem = document.querySelector(`.nav-item[onclick="showSection('${hash}')"]`);
+        if (navItem) {
+          navItem.click();
+        }
+      } else {
+        showPlan();
+      }
+    });
+  </script>
+</body>
+</html>
+
+<!-- Forms Section (for saving/logging data and logout)
+<div style="max-width: 500px; margin: 40px auto 0 auto;">
+  <form method="POST" style="margin-bottom: 1.5rem;">
+    <h2 style="color: var(--accent); margin-bottom: 1rem;">BMI Calculator</h2>
+    <input type="number" name="weight" placeholder="Weight (kg)" step="0.1" required>
+    <input type="number" name="height" placeholder="Height (cm)" step="0.1" required>
+    <button type="submit" name="bmi_submit">Save BMI</button>
+  </form>
+
+  <form method="POST" style="margin-bottom: 1.5rem;">
+    <h2 style="color: var(--accent); margin-bottom: 1rem;">Calorie Tracker</h2>
+    <input type="number" name="age" placeholder="Age" required>
+    <input type="number" name="c_weight" placeholder="Weight (kg)" step="0.1" required>
+    <input type="number" name="c_height" placeholder="Height (cm)" step="0.1" required>
+    <select name="activity" required>
+      <option value="1.2">Sedentary</option>
+      <option value="1.375">Lightly active</option>
+      <option value="1.55">Moderately active</option>
+      <option value="1.725">Very active</option>
+      <option value="1.9">Extra active</option>
+    </select>
+    <button type="submit" name="calorie_submit">Save Calories</button>
+  </form>
+
+  <form method="POST" style="margin-bottom: 1.5rem;">
+    <h2 style="color: var(--accent); margin-bottom: 1rem;">Exercise Log</h2>
+    <input type="text" name="exercise" placeholder="Exercise Name" required>
+    <input type="number" name="reps" placeholder="Reps" required>
+    <input type="number" name="sets" placeholder="Sets" required>
+    <button type="submit" name="exercise_submit">Log Exercise</button>
+  </form>
+
+  <form method="POST" style="margin-bottom: 1.5rem;">
+    <h2 style="color: var(--accent); margin-bottom: 1rem;">Meal Log</h2>
+    <input type="text" name="meal" placeholder="Meal Description" required>
+    <button type="submit" name="meal_submit">Log Meal</button>
+  </form>
+
+  <form method="POST" style="margin-bottom: 1.5rem;">
+    <h2 style="color: var(--accent); margin-bottom: 1rem;">Water Intake</h2>
+    <input type="number" name="cups" placeholder="Cups of Water" required>
+    <button type="submit" name="water_submit">Log Water</button>
+  </form>
+
+  <form action="{{ url_for('logout') }}">
+    <button type="submit" style="background-color: #d63031; color: #fff;">Logout</button>
+  </form>
+</div> -->

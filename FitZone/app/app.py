@@ -6,7 +6,7 @@ import os
 import sys
 external_folder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'setup_db'))
 sys.path.append(external_folder_path)
-from setup_db import User, Gym  # Import models from setup_db.py
+# from setup_db import User, Gym  # Import models from setup_db.py
 
 # ⚙️ Flask config
 app = Flask(__name__, template_folder=os.path.join(os.getcwd(), "templates"))

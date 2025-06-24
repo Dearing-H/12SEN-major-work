@@ -21,8 +21,15 @@ class Gym(Base):
     id = Column(Integer, primary_key=True)
     meal = Column(String, nullable=False)
     reps = Column(Boolean, default=False)
-    exercise_weight = Column(Float, nullable=True)  # ✅ Weight lifted
-    exercise_date = Column(Date, default=date.today)  # ✅ Date of exercise
+    calories = Column(Float, nullable=True)  
+    protein = Column(Float, nullable=True)  
+    carbs = Column(Float, nullable=True) 
+    fats = Column(Float, nullable=True) 
+    water = Column(Float, nullable=True)
+    exercise_type = Column(String, nullable=False)  
+    exercise_duration = Column(Float, nullable=True) 
+    exercise_weight = Column(Float, nullable=True)  
+    exercise_date = Column(Date, default=date.today)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
     user = relationship('User', back_populates='gym_tasks')

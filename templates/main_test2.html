@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🏋️ FITZONE Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.rawgit.com/konvajs/konva/7.0.3/konva.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --card: #1e1e1e;
+      --accent: #00e0ff;
+      --text: #ffffff;
+      --hover: #00bcd4;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1rem;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 0 15px rgba(0,224,255,0.2);
+    }
+
+    h2 {
+      margin-bottom: 1rem;
+      color: var(--accent);
+    }
+
+    label, input, textarea, select, button {
+      display: block;
+      width: 100%;
+      margin-bottom: 0.75rem;
+    }
+
+    input, textarea, select {
+      padding: 0.5rem;
+      background: #2b2b2b;
+      border: none;
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    button {
+      padding: 0.75rem;
+      background-color: var(--accent);
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: bold;
+      color: #000;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: var(--hover);
+    }
+
+    .result {
+      margin-top: 0.5rem;
+      font-weight: bold;
+    }
+
+    ul {
+      list-style: disc inside;
+      margin-top: 0.5rem;
+    }
+
+    canvas {
+      background: #111;
+      border-radius: 8px;
+      width: 100%;
+    }
+
+    /* Optional: style tooltip for muscle viewer */
+    #tooltip {
+      position: fixed;
+      background: rgba(0, 0, 0, 0.8);
+      color: #00ff99;
+      padding: 5px 10px;
+      border-radius: 5px;
+      pointer-events: none;
+      font-family: monospace;
+      font-size: 0.9rem;
+      transition: opacity 0.3s;
+      z-index: 1000;
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.rawgit.com/konvajs/konva/7.0.3/konva.min.js"></script>
+</head>
+<body>
+  <h1>🏋️ FITZONE Dashboard</h1>
+  <div class="container">
+    <!-- BMI Calculator -->
+    <div class="card">
+      <h2>BMI Checker</h2>
+      <label for="bmi-weight">Weight (kg)</label>
+      <input type="number" id="bmi-weight" />
+      <label for="bmi-height">Height (cm)</label>
+      <input type="number" id="bmi-height" />
+      <button onclick="calculateBMI()">Check BMI</button>
+      <p class="result" id="bmi-result"></p>
+    </div>
+
+    <!-- Calorie Calculator -->
+    <div class="card">
+      <h2>Calorie Calculator</h2>
+      <label for="cal-age">Age</label>
+      <input type="number" id="cal-age" />
+      <label for="cal-weight">Weight (kg)</label>
+      <input type="number" id="cal-weight" />
+      <label for="cal-height">Height (cm)</label>
+      <input type="number" id="cal-height" />
+      <label for="cal-activity">Activity Level</label>
+      <select id="cal-activity">
+        <option value="1.2">Sedentary</option>
+        <option value="1.375">Lightly active</option>
+        <option value="1.55">Moderately active</option>
+        <option value="1.725">Very active</option>
+        <option value="1.9">Extra active</option>
+      </select>
+      <button onclick="calculateCalories()">Calculate</button>
+      <p class="result" id="cal-result"></p>
+    </div>
+
+    <!-- Rep Tracker -->
+    <div class="card">
+      <h2>Rep Tracker</h2>
+      <label for="exercise-name">Exercise</label>
+      <input type="text" id="exercise-name" />
+      <label for="reps-count">Reps</label>
+      <input type="number" id="reps-count" />
+      <label for="sets-count">Sets</label>
+      <input type="number" id="sets-count" />
+      <button onclick="logReps()">Log Reps</button>
+      <ul id="reps-log"></ul>
+    </div>
+
+    <!-- Meal Tracker -->
+    <div class="card">
+      <h2>Meal Tracker</h2>
+      <label for="meal">Meal Description</label>
+      <textarea id="meal" placeholder="e.g., Chicken + rice + veggies"></textarea>
+      <button onclick="logMeal()">Log Meal</button>
+      <ul id="meal-log"></ul>
+    </div>
+
+    <!-- Weight Goals -->
+    <div class="card">
+      <h2>Weight Goals</h2>
+      <label for="current-weight">Current Weight (kg)</label>
+      <input type="number" id="current-weight" />
+      <label for="goal-weight">Goal Weight (kg)</label>
+      <input type="number" id="goal-weight" />
+      <button onclick="checkGoal()">Check Progress</button>
+      <p class="result" id="goal-result"></p>
+    </div>
+
+    <!-- Workout Plan Viewer -->
+    <div class="card">
+      <h2>Workout Plan</h2>
+      <label for="day-select">Select Day</label>
+      <select id="day-select" onchange="showPlan()">
+        <option>Monday</option>
+        <option>Tuesday</option>
+        <option>Wednesday</option>
+        <option>Thursday</option>
+        <option>Friday</option>
+      </select>
+      <p class="result" id="plan-output"></p>
+    </div>
+
+    <!-- Water Tracker -->
+    <div class="card">
+      <h2>Water Intake Tracker</h2>
+      <label for="water-intake">Cups of Water Today</label>
+      <input type="number" id="water-intake" />
+      <button onclick="logWater()">Log Water</button>
+      <p class="result" id="water-result"></p>
+    </div>
+
+    <!-- Progress Chart -->
+    <div class="card">
+      <h2>Progress Chart</h2>
+      <canvas id="progressChart" width="400" height="300"></canvas>
+    </div>
+
+    <!-- Muscle Focus Viewer -->
+    <div class="card">
+      <h2>Muscle Focus Viewer</h2>
+      <p>Select a day to see targeted muscles</p>
+      <div id="muscle-stage"></div>
+      <div id="tooltip" class="tooltip" style="opacity:0;"></div>
+    </div>
+  </div>
+
+  <script>
+    function calculateBMI() {
+      const w = parseFloat(document.getElementById('bmi-weight').value);
+      const h = parseFloat(document.getElementById('bmi-height').value) / 100;
+      if (!w || !h) return;
+      const bmi = (w / (h*h)).toFixed(2);
+      let status = bmi < 18.5 ? 'Underweight' :
+                   bmi < 25 ? 'Normal' :
+                   bmi < 30 ? 'Overweight' : 'Obese';
+      document.getElementById('bmi-result').textContent = `Your BMI is ${bmi} (${status})`;
+    }
+
+    function calculateCalories() {
+      const age = +document.getElementById('cal-age').value;
+      const w = +document.getElementById('cal-weight').value;
+      const h = +document.getElementById('cal-height').value;
+      const act = +document.getElementById('cal-activity').value;
+      if (!age || !w || !h) return;
+      const bmr = 10 * w + 6.25 * h - 5 * age + 5;
+      const tdee = Math.round(bmr * act);
+      const goal = tdee > 2500 ? 'Cut' : tdee < 2000 ? 'Bulk' : 'Maintain';
+      document.getElementById('cal-result').textContent = `TDEE: ${tdee} kcal/day. Goal: ${goal}`;
+    }
+
+    const labels = [], repsArr = [], weightArr = [];
+
+    const ctx = document.getElementById('progressChart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Reps', data: repsArr, borderColor: '#00e0ff', tension: 0.3 },
+          { label: 'Goal Weight', data: weightArr, borderColor: 'lime', tension: 0.3 }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true } },
+        plugins: {
+          legend: { position: 'top' },
+          title: { display: true, text: 'Workout & Weight Goal Progress' }
+        }
+      }
+    });
+
+    function logReps() {
+      const ex = document.getElementById('exercise-name').value;
+      const r = +document.getElementById('reps-count').value;
+      const s = +document.getElementById('sets-count').value;
+      if (!ex || !r || !s) return;
+      document.getElementById('reps-log').innerHTML += `<li>${ex}: ${s} sets of ${r} reps</li>`;
+      labels.push(ex);
+      repsArr.push(r * s);
+      weightArr.push(null);
+      chart.update();
+    }
+
+    function logMeal() {
+      const meal = document.getElementById('meal').value;
+      if (!meal) return;
+      document.getElementById('meal-log').innerHTML += `<li>${meal}</li>`;
+      document.getElementById('meal').value = '';
+    }
+
+    function checkGoal() {
+      const current = +document.getElementById('current-weight').value;
+      const goal = +document.getElementById('goal-weight').value;
+      if (!current || !goal) return;
+      const msg = current > goal ? 'You need to cut.' :
+                  current < goal ? 'You need to bulk.' :
+                  'At goal weight!';
+      document.getElementById('goal-result').textContent = msg;
+      labels.push('Goal Weight');
+      repsArr.push(null);
+      weightArr.push(goal);
+      chart.update();
+    }
+
+    const plans = {
+      Monday: 'Push: Bench, Shoulders, Triceps',
+      Tuesday: 'Pull: Deadlift, Pull-up, Curl',
+      Wednesday: 'Legs: Squat, Lunge, Calf Raise',
+      Thursday: 'HIIT & Core: Burpee, Plank, Twist',
+      Friday: 'Full Body: KB Swing, Jump Squat, Row'
+    };
+
+    function showPlan() {
+      const day = document.getElementById('day-select').value;
+      document.getElementById('plan-output').textContent = plans[day];
+      labels.push(day);
+      repsArr.push(null);
+      weightArr.push(null);
+      chart.update();
+    }
+
+    function logWater() {
+      const cups = document.getElementById('water-intake').value;
+      if (!cups) return;
+      document.getElementById('water-result').textContent = `You've logged ${cups} cups today 💧`;
+    }
+  </script>
+
+  <!-- Added Muscle Viewer Script with Konva -->
+  <script>
+    // 1. Workout-to-muscle mapping
+    const dayToMuscles = {
+      Monday: ['chest', 'biceps'],
+      Tuesday: ['back', 'triceps'],
+      Wednesday: ['quads', 'calves'],
+      Thursday: ['chest', 'back', 'biceps', 'triceps', 'quads', 'calves'],
+      Friday: ['shoulders', 'core']
+    };
+
+    const daySelect = document.getElementById('day-select');
+
+    // 2. Konva stage setup
+    const stage = new Konva.Stage({
+      container: 'muscle-stage',
+      width: document.getElementById('muscle-stage').offsetWidth,
+      height: 400,
+      draggable: true
+    });
+    const layer = new Konva.Layer();
+    stage.add(layer);
+
+    // 3. Muscle shape draw functions
+    function drawChest() {
+      return new Konva.Ellipse({ x: 200, y: 120, radiusX: 80, radiusY: 40, listening: true });
+    }
+    function drawBack() {
+      return new Konva.Rect({ x: 160, y: 160, width: 80, height: 120, listening: true });
+    }
+    function drawBiceps() {
+      return new Konva.Circle({ x: 130, y: 100, radius: 25, listening: true });
+    }
+    function drawTriceps() {
+      return new Konva.Circle({ x: 270, y: 100, radius: 25, listening: true });
+    }
+    function drawQuads() {
+      return new Konva.Rect({ x: 170, y: 260, width: 60, height: 100, listening: true });
+    }
+    function drawCalves() {
+      return new Konva.Rect({ x: 210, y: 340, width: 60, height: 50, listening: true });
+    }
+    function drawShoulders() {
+      return new Konva.RegularPolygon({ x: 200, y: 70, sides: 3, radius: 30, listening: true });
+    }
+    function drawCore() {
+      return new Konva.Ellipse({ x: 200, y: 180, radiusX: 50, radiusY: 60, listening: true });
+    }
+
+    // 4. Muscle definitions with draw functions and tooltips
+    const muscleDefs = {
+      chest: { draw: drawChest, tooltip: 'Chest: Bench, Flys' },
+      back: { draw: drawBack, tooltip: 'Back: Deadlift, Rows' },
+      biceps: { draw: drawBiceps, tooltip: 'Biceps: Curl' },
+      triceps: { draw: drawTriceps, tooltip: 'Triceps: Dips' },
+      quads: { draw: drawQuads, tooltip: 'Quads: Squat, Lunge' },
+      calves: { draw: drawCalves, tooltip: 'Calves: Raise' },
+      shoulders: { draw: drawShoulders, tooltip: 'Shoulders: Press' },
+      core: { draw: drawCore, tooltip: 'Core: Plank, Twist' },
+    };
+
+    const muscleShapes = {};
+    const tooltipDiv = document.getElementById('tooltip');
+
+    // 5. Create shapes, add event listeners for tooltip
+    for (const [id, def] of Object.entries(muscleDefs)) {
+      const shape = def.draw();
+      shape.id(id);
+      shape.fill('#444'); // default dark color
+      layer.add(shape);
+      muscleShapes[id] = shape;
+
+      shape.on('mouseover', () => {
+        tooltipDiv.style.opacity = 1;
+        tooltipDiv.innerHTML = def.tooltip;
+      });
+      shape.on('mousemove', e => {
+        tooltipDiv.style.left = e.evt.clientX + 10 + 'px';
+        tooltipDiv.style.top = e.evt.clientY + 10 + 'px';
+      });
+      shape.on('mouseout', () => {
+        tooltipDiv.style.opacity = 0;
+      });
+    }
+
+    layer.draw();
+
+    // 6. Highlight muscles for the selected day with smooth transition
+    function highlight(day) {
+      const targets = dayToMuscles[day] || [];
+      for (const [id, shape] of Object.entries(muscleShapes)) {
+        shape.to({
+          fill: targets.includes(id) ? '#00ff99' : '#444',
+          duration: 0.5
+        });
+      }
+      layer.draw();
+    }
+
+    daySelect.addEventListener('change', e => highlight(e.target.value));
+
+    // Initial highlight
+    highlight(daySelect.value);
+  </script>
+</body>
+</html>

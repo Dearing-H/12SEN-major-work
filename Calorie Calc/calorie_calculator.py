@@ -16,7 +16,7 @@ def get_gpt_explanation(age, weight, height, gender, activity, goal, bmr, tdee, 
         )
 
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",  # use "gpt-4" if you have access
+            model="gpt-3.5-turbo",  
             messages=[
                 {"role": "system", "content": "You are a helpful fitness and nutrition assistant."},
                 {"role": "user", "content": prompt}

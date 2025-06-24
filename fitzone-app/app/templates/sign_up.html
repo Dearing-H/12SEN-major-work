@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Join FitZone</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --card: #1e1e1e;
+      --accent: #00e0ff;
+      --text: #ffffff;
+      --hover: #00bcd4;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 20px;
+    }
+
+    .auth-card {
+      background: var(--card);
+      border-radius: 15px;
+      padding: 35px 30px;
+      width: 95%;
+      max-width: 400px;
+      box-shadow: 0 0 25px rgba(0, 224, 255, 0.15);
+      text-align: center;
+    }
+
+    .auth-card h1 {
+      font-size: 2rem;
+      color: var(--accent);
+      margin-bottom: 25px;
+    }
+
+    .auth-card form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    input, select {
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      background: #2b2b2b;
+      color: var(--text);
+      outline: none;
+    }
+
+    select option {
+      background-color: #2b2b2b;
+    }
+
+    input::placeholder {
+      color: #bbbbbb;
+    }
+
+    form button {
+      background-color: var(--accent);
+      border: none;
+      padding: 12px;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      color: #000;
+      transition: background 0.3s ease;
+    }
+
+    form button:hover {
+      background-color: var(--hover);
+      color: #000;
+    }
+
+    .validation-msg {
+      text-align: left;
+      font-size: 0.85rem;
+      color: #bbb;
+      background-color: #1a1a1a;
+      padding: 8px;
+      border-radius: 6px;
+      line-height: 1.4;
+    }
+
+    #confirm_password_msg {
+      margin-top: -8px;
+    }
+
+    @media screen and (max-width: 480px) {
+      .auth-card {
+        padding: 25px 20px;
+      }
+
+      .auth-card h1 {
+        font-size: 1.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-card">
+    <h1>Join The FitZone</h1>
+    <form action="/sign_up" method="post">
+      <input type="text" placeholder="👤 Username" name="username" required />
+
+      <input type="password" id="password" placeholder="🔒 Password" name="password" oninput="validatePassword()" required />
+      <div class="validation-msg">
+        <div id="len_lbl">📏 Length</div>
+        <div id="case_lbl">🔡 Case</div>
+        <div id="num_lbl">🔢 Number</div>
+        <div id="special_lbl">✨ Special Char</div>
+      </div>
+
+      <input type="password" id="confirm_password" placeholder="🔒 Confirm Password" name="confirm_password" oninput="validatePassword()" required />
+      <div class="validation-msg" id="confirm_password_msg">✅/❌ Match</div>
+
+      <input type="number" placeholder="⚖️ Your Weight (kg)" name="weight" required />
+      <input type="number" placeholder="📏 Your Height (cm)" name="height" required />
+
+      <select name="goal" required>
+        <option value="">🎯 Choose Your Goal</option>
+        <option value="lose">🏋 Lose Weight</option>
+        <option value="gain">💪 Gain Muscle</option>
+        <option value="tone">🏃‍♂️ Tone Up</option>
+      </select>
+
+      <button type="submit">🔥 Join Now</button>
+    </form>
+  </div>
+
+  <script>
+    function validatePassword() {
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm_password').value;
+
+      const lenLbl = document.getElementById('len_lbl');
+      const caseLbl = document.getElementById('case_lbl');
+      const numLbl = document.getElementById('num_lbl');
+      const specialLbl = document.getElementById('special_lbl');
+      const confirmLbl = document.getElementById('confirm_password_msg');
+
+      lenLbl.textContent = password.length >= 6 ? '✅ Length good' : '❌ Too short';
+      caseLbl.textContent = (/[a-z]/.test(password) && /[A-Z]/.test(password)) ? '✅ Mixed case' : '❌ Add upper/lowercase';
+      numLbl.textContent = /\d/.test(password) ? '✅ Contains number' : '❌ Add number';
+      specialLbl.textContent = /[!@#$%^&*(),.?":{}|<>]/.test(password) ? '✅ Contains special' : '❌ Add special';
+      confirmLbl.textContent = (password === confirmPassword && password !== '') ? '✅ Match' : '❌ No match';
+    }
+  </script>
+</body>
+</html>
