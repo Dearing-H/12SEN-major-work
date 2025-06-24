@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GymPro Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #2c3e50;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+    }
+
+    .card {
+      background-color: white;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    label, input, textarea, select {
+      display: block;
+      width: 100%;
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      background-color: #2980b9;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1c5980;
+    }
+
+    .result {
+      margin-top: 0.5rem;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🏋️ GymPro Fitness Dashboard</h1>
+    <p>Track. Train. Transform.</p>
+  </header>
+
+  <div class="container">
+
+    <!-- BMI Calculator -->
+    <div class="card">
+      <h2>BMI Checker</h2>
+      <label for="bmi-weight">Weight (kg)</label>
+      <input type="number" id="bmi-weight">
+      <label for="bmi-height">Height (cm)</label>
+      <input type="number" id="bmi-height">
+      <button onclick="calculateBMI()">Check BMI</button>
+      <p class="result" id="bmi-result"></p>
+    </div>
+
+    <!-- Calorie Calculator -->
+    <div class="card">
+      <h2>Calorie Calculator</h2>
+      <label for="cal-age">Age</label>
+      <input type="number" id="cal-age">
+      <label for="cal-weight">Weight (kg)</label>
+      <input type="number" id="cal-weight">
+      <label for="cal-height">Height (cm)</label>
+      <input type="number" id="cal-height">
+      <label for="cal-activity">Activity Level</label>
+      <select id="cal-activity">
+        <option value="1.2">Sedentary</option>
+        <option value="1.375">Lightly active</option>
+        <option value="1.55">Moderately active</option>
+        <option value="1.725">Very active</option>
+        <option value="1.9">Extra active</option>
+      </select>
+      <button onclick="calculateCalories()">Calculate</button>
+      <p class="result" id="cal-result"></p>
+    </div>
+
+    <!-- Rep Tracker -->
+    <div class="card">
+      <h2>Rep Tracker</h2>
+      <label for="exercise-name">Exercise</label>
+      <input type="text" id="exercise-name">
+      <label for="reps-count">Reps</label>
+      <input type="number" id="reps-count">
+      <label for="sets-count">Sets</label>
+      <input type="number" id="sets-count">
+      <button onclick="logReps()">Log Reps</button>
+      <ul id="reps-log"></ul>
+    </div>
+
+    <!-- Meal Tracker -->
+    <div class="card">
+      <h2>Meal Tracker</h2>
+      <label for="meal">Meal Description</label>
+      <textarea id="meal" placeholder="e.g., Chicken breast + brown rice + broccoli"></textarea>
+      <button onclick="logMeal()">Log Meal</button>
+      <ul id="meal-log"></ul>
+    </div>
+
+    <!-- Weight Goals -->
+    <div class="card">
+      <h2>Weight Goals</h2>
+      <label for="current-weight">Current Weight (kg)</label>
+      <input type="number" id="current-weight">
+      <label for="goal-weight">Goal Weight (kg)</label>
+      <input type="number" id="goal-weight">
+      <button onclick="checkGoal()">Check Progress</button>
+      <p class="result" id="goal-result"></p>
+    </div>
+
+    <!-- Workout Plan Viewer -->
+    <div class="card">
+      <h2>Workout Plan</h2>
+      <label for="day-select">Select Day</label>
+      <select id="day-select" onchange="showPlan()">
+        <option value="Monday">Monday</option>
+        <option value="Tuesday">Tuesday</option>
+        <option value="Wednesday">Wednesday</option>
+        <option value="Thursday">Thursday</option>
+        <option value="Friday">Friday</option>
+      </select>
+      <p id="plan-output"></p>
+    </div>
+
+    <!-- Water Tracker -->
+    <div class="card">
+      <h2>Water Intake Tracker</h2>
+      <label for="water-intake">Cups of Water Today</label>
+      <input type="number" id="water-intake">
+      <button onclick="logWater()">Log Water</button>
+      <p class="result" id="water-result"></p>
+    </div>
+
+  </div>
+
+  <script>
+    function calculateBMI() {
+      const weight = parseFloat(document.getElementById('bmi-weight').value);
+      const height = parseFloat(document.getElementById('bmi-height').value) / 100;
+      if (!weight || !height) return;
+      const bmi = (weight / (height * height)).toFixed(2);
+      let status = '';
+      if (bmi < 18.5) status = 'Underweight';
+      else if (bmi < 25) status = 'Normal weight';
+      else if (bmi < 30) status = 'Overweight';
+      else status = 'Obese';
+      document.getElementById('bmi-result').textContent = `Your BMI is ${bmi} (${status})`;
+    }
+
+    function calculateCalories() {
+      const age = +document.getElementById('cal-age').value;
+      const weight = +document.getElementById('cal-weight').value;
+      const height = +document.getElementById('cal-height').value;
+      const activity = +document.getElementById('cal-activity').value;
+      if (!age || !weight || !height) return;
+
+      // Harris-Benedict Equation (male assumed)
+      const bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+      const tdee = bmr * activity;
+
+      const goal = tdee > 2500 ? "Cut" : tdee < 2000 ? "Bulk" : "Maintain";
+      document.getElementById('cal-result').textContent =
+        `Your TDEE is ${Math.round(tdee)} kcal/day. Recommended goal: ${goal}`;
+    }
+
+    function logReps() {
+      const exercise = document.getElementById('exercise-name').value;
+      const reps = document.getElementById('reps-count').value;
+      const sets = document.getElementById('sets-count').value;
+      if (exercise && reps && sets) {
+        const li = document.createElement('li');
+        li.textContent = `${exercise}: ${sets} sets of ${reps} reps`;
+        document.getElementById('reps-log').appendChild(li);
+      }
+    }
+
+    function logMeal() {
+      const meal = document.getElementById('meal').value;
+      if (meal) {
+        const li = document.createElement('li');
+        li.textContent = meal;
+        document.getElementById('meal-log').appendChild(li);
+        document.getElementById('meal').value = '';
+      }
+    }
+
+    function checkGoal() {
+      const current = +document.getElementById('current-weight').value;
+      const goal = +document.getElementById('goal-weight').value;
+      if (!current || !goal) return;
+      const status = current > goal ? 'You need to cut.' :
+                     current < goal ? 'You need to bulk.' :
+                     'You are at your goal weight!';
+      document.getElementById('goal-result').textContent = status;
+    }
+
+    const workoutPlans = {
+      Monday: 'Push Day: Bench Press, Shoulder Press, Tricep Dips',
+      Tuesday: 'Pull Day: Deadlifts, Pull-ups, Bicep Curls',
+      Wednesday: 'Leg Day: Squats, Lunges, Calf Raises',
+      Thursday: 'HIIT & Core: Burpees, Plank, Russian Twists',
+      Friday: 'Full Body: Kettlebell Swings, Jump Squats, Rows'
+    };
+
+    function showPlan() {
+      const day = document.getElementById('day-select').value;
+      document.getElementById('plan-output').textContent = workoutPlans[day];
+    }
+
+    function logWater() {
+      const cups = document.getElementById('water-intake').value;
+      if (cups) {
+        document.getElementById('water-result').textContent = `You've logged ${cups} cups today! 💧`;
+      }
+    }
+  </script>
+
+</body>
+</html>
