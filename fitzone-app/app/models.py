@@ -30,7 +30,6 @@ class User(Base):
     last_meal_description = Column(Text, nullable=True)
     current_weight = Column(Float, nullable=True)
     goal_weight = Column(Float, nullable=True)
-    last_water_cups = Column(Integer, nullable=True)
 
     # Relationships
     gym_tasks = relationship('Gym', back_populates='user')
@@ -144,5 +143,8 @@ class WaterIntake(Base):
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
     user = relationship('User', back_populates='water_intakes')
+
+    def __repr__(self):
+        return f"<WaterIntake(user_id={self.user_id}, cups={self.cups}, timestamp={self.timestamp})>"
 
 

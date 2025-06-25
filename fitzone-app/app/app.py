@@ -187,7 +187,6 @@ def dashboard():
                 elif "water_submit" in request.form:
                     cups = int(request.form.get("cups"))
                     db_session.add(WaterIntake(user_id=user.id, cups=cups))
-                    user.last_water_cups = cups
                     db_session.commit()
                     flash(f"Water intake saved: {cups} cups", "success")
                     return redirect(url_for('dashboard') + '#water')

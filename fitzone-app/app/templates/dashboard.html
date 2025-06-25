@@ -545,22 +545,22 @@
         <h2>Water Intake Tracker</h2>
         <div class="two-column">
           <div>
-            <form method="POST">
+            <form method="POST" onsubmit="event.preventDefault(); logWater();">
               <div class="form-group">
                 <label for="water-intake">Cups of Water Today</label>
-                <input type="number" id="water-intake" name="cups" value="{{ user.last_water_cups or '' }}" placeholder="Number of cups" min="0" required />
+                <input type="number" id="water-intake" name="cups" placeholder="e.g., 1 cup = 250ml" min="0" required />
               </div>
-              <button type="submit" name="water_submit">Log Water</button>
+              <button type="submit">Log Water</button>
             </form>
+            <div class="result" style="margin-top: 1rem;" id="hydration-tips">
+              💡 Tip: Most adults need around 8–10 cups of water per day. Adjust based on your activity level!
+            </div>
           </div>
           <div>
             <div class="result" id="water-result">
-              <h3 style="color: var(--accent); margin-bottom: 1rem;">Recent Water Log</h3>
-              <ul id="water-log">
-                {% for log in water_logs %}
-                  <li><strong>{{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}:</strong> {{ log.cups }} cups</li>
-                {% endfor %}
-              </ul>
+              <h3 style="color: var(--accent); margin-bottom: 1rem;">Today's Water Log</h3>
+              <ul id="water-log"></ul>
+              <div id="hydration-status" style="margin-top: 1rem;"></div>
             </div>
           </div>
         </div>
@@ -569,7 +569,20 @@
       <!-- Progress Chart Section -->
       <section id="progress" class="section">
         <h2>Progress Chart</h2>
-        <canvas id="progressChart" width="400" height="300"></canvas>
+        <div class="two-column">
+          <div>
+            <canvas id="progressChart" width="400" height="300"></canvas>
+            <div class="result" style="background: #0d1b2a; color: #00e0ff; border-left: 4px solid #00e0ff;">
+              <strong>Performance Summary:</strong><br />
+              You've increased reps by 150 since Week 1!<br />
+              You've lost 3 kg – great job!
+            </div>
+            <div style="margin-top: 1rem; color: var(--text); font-weight: bold;">🏋️ Reps today: 0</div>
+          </div>
+          <div>
+            <canvas id="nutritionChart" width="400" height="300"></canvas>
+          </div>
+        </div>
       </section>
 
       <!-- Muscle Focus Section -->
@@ -694,47 +707,43 @@
 
     function initProgressChart() {
       const canvas = document.getElementById('progressChart');
-      if (!canvas) {
-        console.error('ProgressChart canvas not found');
-        return;
-      }
-
-      if (chart) return;
+      if (!canvas || chart) return;
 
       const ctx = canvas.getContext('2d');
       chart = new Chart(ctx, {
         type: 'line',
         data: {
-          labels,
+          labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
           datasets: [
             {
-              label: 'Total Reps',
-              data: repsArr,
-              borderColor: '#00e0ff',
-              backgroundColor: 'rgba(0,224,255,0.1)',
+              label: '🏋️ Exercise',
+              data: [100, 150, 180, 230],
+              borderColor: '#00b4d8',
+              backgroundColor: 'rgba(0,180,216,0.1)',
               tension: 0.3,
-              fill: true
+              fill: true,
+              pointBackgroundColor: '#fff',
+              pointRadius: 6
             },
             {
-              label: 'Weight Goals',
-              data: weightArr,
-              borderColor: '#00ff99',
-              backgroundColor: 'rgba(0,255,153,0.1)',
+              label: '⚖️ Weight',
+              data: [80, 77, 77, 76],
+              borderColor: '#ef476f',
+              backgroundColor: 'rgba(239,71,111,0.1)',
               tension: 0.3,
-              fill: true
+              fill: true,
+              pointBackgroundColor: '#fff',
+              pointRadius: 6
             }
           ]
         },
         options: {
           responsive: true,
           plugins: {
-            legend: {
-              position: 'top',
-              labels: { color: '#000000' }
-            },
+            legend: { labels: { color: '#fff' } },
             title: {
               display: true,
-              text: 'Workout & Weight Progress Over Time',
+              text: 'Progress Overview (Exercise vs Weight)',
               color: '#00e0ff'
             }
           },
@@ -747,6 +756,32 @@
             x: {
               ticks: { color: '#ffffff' },
               grid: { color: 'rgba(255,255,255,0.1)' }
+            }
+          }
+        }
+      });
+
+      const nutCtx = document.getElementById('nutritionChart').getContext('2d');
+      new Chart(nutCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Protein', 'Carbs', 'Fats'],
+          datasets: [{
+            label: 'Nutrition Breakdown',
+            data: [30, 40, 30],
+            backgroundColor: ['#48cae4', '#80ed99', '#ffb703'],
+            borderWidth: 2
+          }]
+        },
+        options: {
+          plugins: {
+            legend: {
+              labels: { color: '#fff' }
+            },
+            title: {
+              display: true,
+              text: 'Nutrition Breakdown',
+              color: '#ffffff'
             }
           }
         }
@@ -846,26 +881,44 @@
 
     // Water Tracker
     function logWater() {
-      const cups = parseInt(document.getElementById('water-intake').value);
-      const resultDiv = document.getElementById('water-result');
-      
-      if (!cups || cups <= 0) {
-        resultDiv.textContent = 'Please enter a valid number of cups';
+      const cupsInput = document.getElementById('water-intake');
+      const cups = parseInt(cupsInput.value);
+      const logList = document.getElementById('water-log');
+      const statusDiv = document.getElementById('hydration-status');
+
+      if (isNaN(cups) || cups <= 0) {
+        statusDiv.innerHTML = `<div style="color: #ff6b6b;">❌ Please enter a valid number of cups</div>`;
         return;
       }
-      
-      const percentage = Math.min((cups / 8) * 100, 100);
-      const status = cups >= 8 ? 'Great job! You\'ve met your daily goal!' :
-                     cups >= 6 ? 'Almost there! Just a few more cups.' :
-                     'Keep drinking! You need more water today.';
-      
-      resultDiv.innerHTML = `
-        <div><strong>${cups} cups logged today 💧</strong></div>
-        <div style="margin-top: 10px;">Progress: ${percentage.toFixed(1)}% of daily goal</div>
-        <div style="margin-top: 5px;">${status}</div>
+
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const entry = document.createElement('li');
+      entry.innerHTML = `<strong>${timeStr}</strong>: ${cups} cup${cups > 1 ? 's' : ''}`;
+      logList.appendChild(entry);
+
+      let total = 0;
+      for (const li of logList.children) {
+        const match = li.textContent.match(/(\d+)\s+cup/);
+        if (match) total += parseInt(match[1]);
+      }
+
+      const percentage = Math.min((total / 8) * 100, 100);
+      let statusMsg = '';
+      if (total >= 8) {
+        statusMsg = '✅ Hydration Goal Met! 💧 Keep it up!';
+      } else if (total >= 6) {
+        statusMsg = '🟡 Almost there! Just a little more.';
+      } else {
+        statusMsg = '🔴 Low intake. Drink more water!';
+      }
+
+      statusDiv.innerHTML = `
+        <div><strong>Total Water: ${total} cups</strong></div>
+        <div>Progress: ${percentage.toFixed(1)}%</div>
+        <div>${statusMsg}</div>
       `;
-      
-      document.getElementById('water-intake').value = '';
+
+      cupsInput.value = '';
     }
 
     // Muscle Viewer with Konva
