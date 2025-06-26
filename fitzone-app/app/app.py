@@ -218,3 +218,6 @@ if __name__ == '__main__':
     with app.app_context():
         Base.metadata.create_all(engine)
     app.run(debug=True)
+@app.route('/about')
+def about():
+    return render_template('about.html')

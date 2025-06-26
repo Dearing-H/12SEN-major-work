@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About FITZONE</title>
+  <style>
+    body {
+      background-color: #0f0f0f;
+      color: #ffffff;
+      font-family: 'Orbitron', sans-serif;
+      padding: 40px;
+      line-height: 1.6;
+    }
+    h1 {
+      color: #00e0ff;
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+    }
+    h2 {
+      color: #00ff99;
+      margin-top: 40px;
+    }
+    .section {
+      margin-bottom: 30px;
+    }
+    a {
+      color: #00e0ff;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>About FITZONE</h1>
+
+  <div class="section">
+    <p><strong>Fitzone</strong> is a modular, interactive fitness dashboard designed as part of the Year 12 Software Engineering Major Work. Built with Python, Flask, and HTML5/CSS3, it aims to centralise health metrics, workout planning, and user progress tracking into one user-friendly platform.</p>
+  </div>
+
+  <div class="section">
+    <h2>🔧 Features</h2>
+    <ul>
+      <li>BMI and Calorie Calculators with live feedback</li>
+      <li>Meal, Water, and Rep Logging Systems</li>
+      <li>Weekly Workout Plan Generator</li>
+      <li>Muscle Viewer using Konva.js for interactive muscle highlighting</li>
+      <li>Custom progress chart with data visualisation</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>💡 Inspiration</h2>
+    <p>Fitzone was inspired by industry-leading apps such as <em>Fitbod</em>, <em>MyFitnessPal</em>, and <em>Strong</em>. The goal was to create an equally powerful tool that prioritises educational clarity, data privacy, and modular design.</p>
+  </div>
+
+  <div class="section">
+    <h2>🚀 Future Development</h2>
+    <ul>
+      <li>Integration with Fitbit and Apple Health APIs</li>
+      <li>AI-based smart workout recommendations</li>
+      <li>User authentication with secure profile customisation</li>
+      <li>Leaderboard and progress sharing system</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <p><a href="{{ url_for('dashboard') }}">← Back to Dashboard</a></p>
+  </div>
+
+</body>
+</html>

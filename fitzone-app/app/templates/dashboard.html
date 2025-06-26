@@ -16,6 +16,28 @@
       --active: #00ff99;
     }
 
+    body.light-mode {
+      --bg: #ffffff;
+      --card: #f4f4f4;
+      --accent: #0077cc;
+      --text: #000000;
+      --hover: #005fa3;
+      --nav-bg: #e0e0e0;
+      --active: #44c767;
+    }
+    .theme-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: 2px solid var(--accent);
+      padding: 8px 16px;
+      border-radius: 6px;
+      color: var(--accent);
+      font-weight: bold;
+      cursor: pointer;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -118,6 +140,33 @@
       margin: 0 auto;
     }
 
+    .quick-stats {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--card);
+      flex: 1;
+      min-width: 180px;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0,224,255,0.15);
+      font-weight: bold;
+      text-align: center;
+      color: var(--accent);
+    }
+    .motivational-quote {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      color: #00ff99;
+      font-style: italic;
+      text-align: center;
+    }
+
     .content-frame {
       background: var(--card);
       border-radius: 16px;
@@ -182,6 +231,10 @@
       color: var(--text);
       font-size: 1rem;
       transition: border-color 0.3s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.10);
+    }
+    input:hover, textarea:hover, select:hover {
+      box-shadow: 0 0 8px rgba(0,224,255,0.2);
     }
 
     input:focus, textarea:focus, select:focus {
@@ -308,8 +361,9 @@
   <script src="https://unpkg.com/konva@9.3.13/konva.min.js"></script>
 </head>
 <body>
-  <header class="header">
+  <header class="header" style="position: relative;">
     <h1>🏋️ FITZONE Dashboard</h1>
+    <button onclick="toggleTheme()" class="theme-toggle">🌗 Toggle Theme</button>
     <nav class="nav-menu">
       <div class="nav-item active" onclick="showSection('welcome')">
         <div class="nav-icon">🏠</div>
@@ -351,10 +405,26 @@
         <div class="nav-icon">🏋️</div>
         <div class="nav-label">Muscles</div>
       </div>
+      <!-- About nav item -->
+      <div class="nav-item" onclick="showSection('about')">
+        <div class="nav-icon">ℹ️</div>
+        <div class="nav-label">About</div>
+      </div>
+      <!-- Logout button -->
+      <div class="nav-item" onclick="window.location.href='{{ url_for('logout') }}'">
+        <div class="nav-icon">🚪</div>
+        <div class="nav-label">Logout</div>
+      </div>
     </nav>
   </header>
 
   <main class="main-container">
+    <div class="quick-stats">
+      <div class="stat-card">👤 User: <strong>{{ user.username }}</strong></div>
+      <div class="stat-card">⚖️ BMI: <strong>{{ user.bmi or 'N/A' }}</strong></div>
+      <div class="stat-card">🔥 TDEE: <strong>{{ user.tdee or 'N/A' }} kcal</strong></div>
+      <div class="stat-card">🎯 Goal: <strong>{{ user.goal_weight or 'N/A' }} kg</strong></div>
+    </div>
     <div class="content-frame">
       <!-- Welcome Section -->
       <section id="welcome" class="section active">
@@ -362,6 +432,9 @@
           <h2>Welcome to FITZONE</h2>
           <p>Your ultimate fitness companion! Select any tool from the menu above to track your progress, plan your workouts, and achieve your fitness goals.</p>
           <p>Get started by clicking on one of the icons above to access different features.</p>
+        </div>
+        <div class="motivational-quote">
+          “Don’t count the days. Make the days count.” – Muhammad Ali
         </div>
       </section>
 
@@ -373,18 +446,20 @@
             <form id="bmi-form" method="post">
               <div class="form-group">
                 <label for="weight">Weight (kg):</label>
-                <input type="number" step="0.1" id="weight" name="weight" value="{{ user.weight or '' }}" required />
+                <input type="number" step="0.1" id="weight" name="weight" value="{{ user.weight or '' }}" required placeholder="e.g., 70.5" aria-label="Weight in kilograms" />
+                <small>Use decimal format (e.g., 70.5)</small>
               </div>
               <div class="form-group">
                 <label for="height">Height (cm):</label>
-                <input type="number" step="0.1" id="height" name="height" value="{{ user.height or '' }}" required />
+                <input type="number" step="0.1" id="height" name="height" value="{{ user.height or '' }}" required placeholder="e.g., 175.0" aria-label="Height in centimeters" />
+                <small>Use decimal format (e.g., 175.0)</small>
               </div>
-              <button type="submit" name="bmi_submit">Save & Calculate BMI</button>
+              <button type="submit" name="bmi_submit">Save &amp; Calculate BMI ➕</button>
             </form>
-            <button onclick="calculateBMI()">Calculate BMI</button>
+            <button onclick="calculateBMI()">Calculate BMI ➕</button>
           </div>
           <div>
-            <div id="bmi-result" class="result">
+            <div id="bmi-result" class="result" style="margin-top: 1rem;">
               {% if user.bmi %}
                 Your last saved BMI is <strong>{{ user.bmi }}</strong>.
               {% else %}
@@ -403,32 +478,35 @@
             <form method="POST">
               <div class="form-group">
                 <label for="cal-age">Age</label>
-                <input type="number" id="cal-age" name="age" value="{{ user.age or '' }}" placeholder="Enter your age" min="0" required />
+                <input type="number" id="cal-age" name="age" value="{{ user.age or '' }}" placeholder="Enter your age" min="0" required aria-label="Age in years" />
               </div>
               <div class="form-group">
                 <label for="cal-weight">Weight (kg)</label>
-                <input type="number" id="cal-weight" name="c_weight" value="{{ user.weight or '' }}" placeholder="Enter your weight" min="0" step="0.1" required />
+                <input type="number" id="cal-weight" name="c_weight" value="{{ user.weight or '' }}" placeholder="e.g., 70.5" min="0" step="0.1" required aria-label="Weight in kilograms" />
+                <small>Use decimal format (e.g., 70.5)</small>
               </div>
               <div class="form-group">
                 <label for="cal-height">Height (cm)</label>
-                <input type="number" id="cal-height" name="c_height" value="{{ user.height or '' }}" placeholder="Enter your height" min="0" step="0.1" required />
+                <input type="number" id="cal-height" name="c_height" value="{{ user.height or '' }}" placeholder="e.g., 175.0" min="0" step="0.1" required aria-label="Height in centimeters" />
+                <small>Use decimal format (e.g., 175.0)</small>
               </div>
               <div class="form-group">
                 <label for="cal-activity">Activity Level</label>
-                <select id="cal-activity" name="activity" required>
+                <select id="cal-activity" name="activity" required aria-label="Activity Level">
                   <option value="1.2" {% if user.activity_level == 1.2 %}selected{% endif %}>Sedentary</option>
                   <option value="1.375" {% if user.activity_level == 1.375 %}selected{% endif %}>Lightly active</option>
                   <option value="1.55" {% if user.activity_level == 1.55 %}selected{% endif %}>Moderately active</option>
                   <option value="1.725" {% if user.activity_level == 1.725 %}selected{% endif %}>Very active</option>
                   <option value="1.9" {% if user.activity_level == 1.9 %}selected{% endif %}>Extra active</option>
                 </select>
+                <small>Select based on your average daily activity</small>
               </div>
-              <button type="submit" name="calorie_submit">Save Calories</button>
+              <button type="submit" name="calorie_submit">Save Calories 🍽️</button>
             </form>
-            <button onclick="calculateCalories()">Calculate TDEE</button>
+            <button onclick="calculateCalories()">Calculate TDEE 🔥</button>
           </div>
           <div>
-            <div class="result" id="cal-result">
+            <div class="result" id="cal-result" style="margin-top: 1rem;">
               {% if user.tdee %}
                 Your last calculated daily requirement is <strong>{{ user.tdee }} kcal</strong>.
               {% else %}
@@ -447,17 +525,20 @@
             <form method="POST">
               <div class="form-group">
                 <label for="exercise-name">Exercise</label>
-                <input type="text" id="exercise-name" name="exercise" value="{{ user.last_exercise_name or '' }}" placeholder="Exercise name" required />
+                <input type="text" id="exercise-name" name="exercise" value="{{ user.last_exercise_name or '' }}" placeholder="e.g., Push-ups" required aria-label="Exercise name" />
+                <small>Enter the exercise name (e.g., Push-ups)</small>
               </div>
               <div class="form-group">
                 <label for="reps-count">Reps</label>
-                <input type="number" id="reps-count" name="reps" value="{{ user.last_reps or '' }}" placeholder="Number of reps" min="0" required />
+                <input type="number" id="reps-count" name="reps" value="{{ user.last_reps or '' }}" placeholder="e.g., 12" min="0" required aria-label="Number of reps" />
+                <small>How many repetitions per set?</small>
               </div>
               <div class="form-group">
                 <label for="sets-count">Sets</label>
-                <input type="number" id="sets-count" name="sets" value="{{ user.last_sets or '' }}" placeholder="Number of sets" min="0" required />
+                <input type="number" id="sets-count" name="sets" value="{{ user.last_sets or '' }}" placeholder="e.g., 3" min="0" required aria-label="Number of sets" />
+                <small>How many sets?</small>
               </div>
-              <button type="submit" name="exercise_submit">Log Exercise</button>
+              <button type="submit" name="exercise_submit">Log Exercise 🏋️</button>
             </form>
           </div>
           <div>
@@ -479,9 +560,10 @@
             <form method="POST">
               <div class="form-group">
                 <label for="meal">Meal Description</label>
-                <textarea id="meal" name="meal" placeholder="e.g., Chicken breast + brown rice + vegetables" rows="4" required>{{ user.last_meal_description or '' }}</textarea>
+                <textarea id="meal" name="meal" placeholder="e.g., Grilled chicken, rice &amp; veggies" rows="4" required aria-label="Meal description">{{ user.last_meal_description or '' }}</textarea>
+                <small>Example: “Grilled chicken, rice &amp; veggies”</small>
               </div>
-              <button type="submit" name="meal_submit">Log Meal</button>
+              <button type="submit" name="meal_submit">Log Meal 🍴</button>
             </form>
           </div>
           <div>
@@ -503,17 +585,19 @@
             <form method="POST">
               <div class="form-group">
                 <label for="current-weight">Current Weight (kg)</label>
-                <input type="number" id="current-weight" name="current_weight" value="{{ user.current_weight or '' }}" placeholder="Current weight" min="0" step="0.1" required />
+                <input type="number" id="current-weight" name="current_weight" value="{{ user.current_weight or '' }}" placeholder="e.g., 80.0" min="0" step="0.1" required aria-label="Current weight in kilograms" />
+                <small>Use decimal format (e.g., 80.0)</small>
               </div>
               <div class="form-group">
                 <label for="goal-weight">Goal Weight (kg)</label>
-                <input type="number" id="goal-weight" name="goal_weight" value="{{ user.goal_weight or '' }}" placeholder="Goal weight" min="0" step="0.1" required />
+                <input type="number" id="goal-weight" name="goal_weight" value="{{ user.goal_weight or '' }}" placeholder="e.g., 75.0" min="0" step="0.1" required aria-label="Goal weight in kilograms" />
+                <small>Use decimal format (e.g., 75.0)</small>
               </div>
-              <button type="submit" name="goal_submit">Save Goal</button>
+              <button type="submit" name="goal_submit">Save Goal 🎯</button>
             </form>
           </div>
           <div>
-            <div class="result" id="goal-result">
+            <div class="result" id="goal-result" style="margin-top: 1rem;">
               {% if user.goal_weight and user.current_weight %}
                 Your goal is <strong>{{ user.goal_weight }} kg</strong>. You are currently <strong>{{ user.current_weight }} kg</strong>.
               {% else %}
@@ -548,16 +632,17 @@
             <form method="POST" onsubmit="event.preventDefault(); logWater();">
               <div class="form-group">
                 <label for="water-intake">Cups of Water Today</label>
-                <input type="number" id="water-intake" name="cups" placeholder="e.g., 1 cup = 250ml" min="0" required />
+                <input type="number" id="water-intake" name="cups" placeholder="e.g., 1 cup = 250ml" min="0" required aria-label="Cups of water today" />
+                <small>1 cup ≈ 250ml. Log every drink!</small>
               </div>
-              <button type="submit">Log Water</button>
+              <button type="submit">Log Water 💧</button>
             </form>
             <div class="result" style="margin-top: 1rem;" id="hydration-tips">
               💡 Tip: Most adults need around 8–10 cups of water per day. Adjust based on your activity level!
             </div>
           </div>
           <div>
-            <div class="result" id="water-result">
+            <div class="result" id="water-result" style="margin-top: 1rem;">
               <h3 style="color: var(--accent); margin-bottom: 1rem;">Today's Water Log</h3>
               <ul id="water-log"></ul>
               <div id="hydration-status" style="margin-top: 1rem;"></div>
@@ -569,6 +654,13 @@
       <!-- Progress Chart Section -->
       <section id="progress" class="section">
         <h2>Progress Chart</h2>
+        <div class="form-group">
+          <label for="progress-range">Time Range</label>
+          <select id="progress-range" onchange="updateProgressChart()">
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+          </select>
+        </div>
         <div class="two-column">
           <div>
             <canvas id="progressChart" width="400" height="300"></canvas>
@@ -585,13 +677,85 @@
         </div>
       </section>
 
-      <!-- Muscle Focus Section -->
+      <!-- Muscle Focus Section (SVG Interactive) -->
       <section id="muscles" class="section">
         <h2>Muscle Focus Viewer</h2>
-        <p style="text-align: center; margin-bottom: 20px;">Select a workout day to see targeted muscle groups</p>
-        <div class="form-group">
+        <style>
+          .muscle-svg-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 2rem;
+            margin-top: 1.5rem;
+          }
+          .svg-human-diagram {
+            width: 320px;
+            max-width: 100vw;
+            height: 480px;
+            display: block;
+            background: #181818;
+            border-radius: 16px;
+            box-shadow: 0 0 24px rgba(0,224,255,0.12);
+          }
+          .muscle-group {
+            cursor: pointer;
+            transition: fill 0.25s, stroke 0.25s;
+            stroke: #00e0ff;
+            stroke-width: 0;
+          }
+          .muscle-group[data-active="true"] {
+            fill: #00ff99 !important;
+            stroke: #00e0ff;
+            stroke-width: 2;
+            filter: drop-shadow(0 0 6px #00ff99aa);
+          }
+          .muscle-group[data-selected="true"] {
+            fill: #ffb703 !important;
+            stroke: #ffb703;
+            stroke-width: 3;
+            filter: drop-shadow(0 0 8px #ffb703cc);
+          }
+          .muscle-group[data-focused="true"] {
+            fill: #00e0ff !important;
+            stroke: #00e0ff;
+            stroke-width: 4;
+            filter: drop-shadow(0 0 12px #00e0ffcc);
+          }
+          .muscle-panel {
+            background: var(--card);
+            border-radius: 12px;
+            min-width: 240px;
+            max-width: 320px;
+            padding: 1rem 1.5rem;
+            color: var(--text);
+            box-shadow: 0 0 16px rgba(0,224,255,0.08);
+            border: 1px solid var(--accent);
+          }
+          .muscle-panel h3 {
+            color: var(--active);
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+          }
+          .muscle-panel ul {
+            margin: 0.5rem 0 0 0;
+            padding-left: 1.25rem;
+            color: var(--text);
+            font-size: 1rem;
+          }
+          .muscle-panel .desc {
+            color: #b2f7ef;
+            font-size: 1.05rem;
+            margin-bottom: 0.75rem;
+          }
+        </style>
+        <div style="text-align:center; margin-bottom:12px;">
+          <span style="font-size:1.2rem; color:var(--active); font-weight:bold;">Visualize Your Target Muscles</span>
+        </div>
+        <p style="text-align: center; margin-bottom: 18px;">Select a workout day to see targeted muscle groups. Click a muscle for details!</p>
+        <div class="form-group" style="max-width: 300px; margin: 0 auto 1rem auto;">
           <label for="muscle-day-select">Select Day</label>
-          <select id="muscle-day-select" onchange="highlightMuscles(this.value)">
+          <select id="muscle-day-select">
             <option>Monday</option>
             <option>Tuesday</option>
             <option>Wednesday</option>
@@ -599,8 +763,195 @@
             <option>Friday</option>
           </select>
         </div>
-        <div id="muscle-stage" style="width: 100%; height: 400px;"></div>
-        <div id="tooltip" class="tooltip" style="opacity:0;"></div>
+        <div class="muscle-svg-container">
+          <svg class="svg-human-diagram" viewBox="0 0 240 360" xmlns="http://www.w3.org/2000/svg">
+            <!-- Arms (background) -->
+            <ellipse cx="60" cy="90" rx="24" ry="48" fill="#333" />
+            <ellipse cx="180" cy="90" rx="24" ry="48" fill="#333" />
+            <!-- Shoulders -->
+            <ellipse class="muscle-group" id="shoulders" data-muscle="shoulders" cx="60" cy="62" rx="18" ry="18" fill="#444" />
+            <ellipse class="muscle-group" id="shoulders-r" data-muscle="shoulders" cx="180" cy="62" rx="18" ry="18" fill="#444" />
+            <!-- Biceps -->
+            <ellipse class="muscle-group" id="biceps" data-muscle="biceps" cx="60" cy="100" rx="13" ry="22" fill="#444" />
+            <ellipse class="muscle-group" id="biceps-r" data-muscle="biceps" cx="180" cy="100" rx="13" ry="22" fill="#444" />
+            <!-- Triceps -->
+            <ellipse class="muscle-group" id="triceps" data-muscle="triceps" cx="60" cy="140" rx="13" ry="20" fill="#444" />
+            <ellipse class="muscle-group" id="triceps-r" data-muscle="triceps" cx="180" cy="140" rx="13" ry="20" fill="#444" />
+            <!-- Chest -->
+            <ellipse class="muscle-group" id="chest" data-muscle="chest" cx="120" cy="80" rx="38" ry="24" fill="#444" />
+            <!-- Core (abs) -->
+            <rect class="muscle-group" id="core" data-muscle="core" x="96" y="110" width="48" height="60" rx="16" fill="#444" />
+            <!-- Back (upper) -->
+            <rect class="muscle-group" id="back" data-muscle="back" x="80" y="170" width="80" height="34" rx="16" fill="#444" />
+            <!-- Quads -->
+            <rect class="muscle-group" id="quads" data-muscle="quads" x="97" y="210" width="22" height="60" rx="10" fill="#444" />
+            <rect class="muscle-group" id="quads-r" data-muscle="quads" x="121" y="210" width="22" height="60" rx="10" fill="#444" />
+            <!-- Calves -->
+            <rect class="muscle-group" id="calves" data-muscle="calves" x="99" y="272" width="16" height="40" rx="8" fill="#444" />
+            <rect class="muscle-group" id="calves-r" data-muscle="calves" x="125" y="272" width="16" height="40" rx="8" fill="#444" />
+            <!-- Outline/body -->
+            <ellipse cx="120" cy="50" rx="30" ry="30" fill="#222" />
+            <rect x="90" y="80" width="60" height="180" rx="28" fill="#222" />
+            <rect x="97" y="260" width="22" height="56" rx="10" fill="#222" />
+            <rect x="121" y="260" width="22" height="56" rx="10" fill="#222" />
+          </svg>
+          <div class="muscle-panel" id="muscle-panel">
+            <h3>Muscle Group Info</h3>
+            <div class="desc">Select a muscle to see details, tips, and exercises.</div>
+            <div id="muscle-details">
+              <strong>Tip:</strong> Choose a workout day to highlight your focus areas.
+            </div>
+          </div>
+        </div>
+        <script>
+        // Muscle group data (name, description, exercises)
+        const muscleData = {
+          chest: {
+            name: "Chest",
+            desc: "The pectoral muscles are responsible for pushing movements.",
+            exercises: ["Bench Press", "Push-ups", "Chest Fly", "Incline Press"]
+          },
+          back: {
+            name: "Back",
+            desc: "The back muscles support pulling and posture.",
+            exercises: ["Deadlifts", "Pull-ups", "Barbell Rows", "Lat Pulldown"]
+          },
+          biceps: {
+            name: "Biceps",
+            desc: "Biceps are used for curling and pulling movements.",
+            exercises: ["Bicep Curls", "Chin-ups", "Hammer Curl"]
+          },
+          triceps: {
+            name: "Triceps",
+            desc: "Triceps are key for extending the arm.",
+            exercises: ["Tricep Dips", "Overhead Extension", "Close-grip Bench"]
+          },
+          shoulders: {
+            name: "Shoulders",
+            desc: "Deltoids help with lifting and overhead movements.",
+            exercises: ["Overhead Press", "Lateral Raise", "Front Raise"]
+          },
+          core: {
+            name: "Core",
+            desc: "Core muscles stabilize the body and support balance.",
+            exercises: ["Planks", "Crunches", "Russian Twist", "Leg Raise"]
+          },
+          quads: {
+            name: "Quads",
+            desc: "Quadriceps power knee extension and squatting.",
+            exercises: ["Squats", "Lunges", "Leg Press"]
+          },
+          calves: {
+            name: "Calves",
+            desc: "Calf muscles are important for ankle movement and stability.",
+            exercises: ["Calf Raises", "Jump Rope", "Seated Calf Press"]
+          }
+        };
+        // Day-to-muscle mapping
+        const dayToMuscles = {
+          Monday: ['chest', 'triceps', 'shoulders'],
+          Tuesday: ['back', 'biceps'],
+          Wednesday: ['quads', 'calves'],
+          Thursday: ['core', 'chest', 'back'],
+          Friday: ['shoulders', 'core', 'quads', 'biceps']
+        };
+        // All SVG muscle elements (grouped by main muscle)
+        const muscleSvgIds = {
+          chest: ['chest'],
+          back: ['back'],
+          biceps: ['biceps', 'biceps-r'],
+          triceps: ['triceps', 'triceps-r'],
+          shoulders: ['shoulders', 'shoulders-r'],
+          core: ['core'],
+          quads: ['quads', 'quads-r'],
+          calves: ['calves', 'calves-r']
+        };
+        let selectedMuscle = null;
+        // Helper: set attribute for all SVG elements of a muscle
+        function setMuscleAttr(muscle, attr, value) {
+          (muscleSvgIds[muscle]||[]).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.setAttribute(attr, value);
+          });
+        }
+        // Helper: clear all highlight attrs
+        function clearMuscleAttrs() {
+          Object.keys(muscleSvgIds).forEach(m => {
+            setMuscleAttr(m, 'data-active', 'false');
+            setMuscleAttr(m, 'data-selected', 'false');
+            setMuscleAttr(m, 'data-focused', 'false');
+          });
+        }
+        // Highlight muscles for selected day
+        function highlightMusclesSVG(day) {
+          clearMuscleAttrs();
+          // Highlight today's focus
+          (dayToMuscles[day]||[]).forEach(m => setMuscleAttr(m, 'data-active', 'true'));
+          // If a muscle is selected, keep it highlighted as selected/focused
+          if (selectedMuscle) {
+            setMuscleAttr(selectedMuscle, 'data-selected', 'true');
+            setMuscleAttr(selectedMuscle, 'data-focused', 'true');
+          }
+        }
+        // Update muscle info panel
+        function showMusclePanel(muscle) {
+          const panel = document.getElementById('muscle-panel');
+          const details = document.getElementById('muscle-details');
+          if (!muscleData[muscle]) {
+            details.innerHTML = `<strong>Tip:</strong> Choose a workout day to highlight your focus areas.`;
+            panel.querySelector('h3').textContent = 'Muscle Group Info';
+            panel.querySelector('.desc').textContent = 'Select a muscle to see details, tips, and exercises.';
+            return;
+          }
+          const d = muscleData[muscle];
+          panel.querySelector('h3').textContent = d.name;
+          panel.querySelector('.desc').textContent = d.desc;
+          details.innerHTML = `<strong>Sample Exercises:</strong><ul>` +
+            d.exercises.map(e => `<li>${e}</li>`).join('') +
+            `</ul>`;
+        }
+        // Setup listeners
+        document.addEventListener('DOMContentLoaded', function() {
+          // Initial highlight
+          const selDay = document.getElementById('muscle-day-select');
+          highlightMusclesSVG(selDay.value);
+          // Day selector
+          selDay.addEventListener('change', function() {
+            highlightMusclesSVG(this.value);
+            // If selected muscle is not on this day's focus, keep it highlighted
+          });
+          // Click handlers for muscles
+          Object.keys(muscleSvgIds).forEach(muscle => {
+            (muscleSvgIds[muscle]||[]).forEach(id => {
+              const el = document.getElementById(id);
+              if (!el) return;
+              el.addEventListener('click', function() {
+                // Deselect previous
+                selectedMuscle = muscle;
+                highlightMusclesSVG(selDay.value);
+                showMusclePanel(muscle);
+              });
+              el.addEventListener('mouseenter', function() {
+                setMuscleAttr(muscle, 'data-focused', 'true');
+              });
+              el.addEventListener('mouseleave', function() {
+                // Only remove if not selected
+                if (selectedMuscle !== muscle)
+                  setMuscleAttr(muscle, 'data-focused', 'false');
+              });
+            });
+          });
+          // On initial load, show default panel
+          showMusclePanel(null);
+        });
+        </script>
+      </section>
+
+      <!-- About Section -->
+      <section id="about" class="section">
+        <h2>About FITZONE</h2>
+        <p style="line-height:1.6;">Fitzone is your AI-powered training dashboard. Track your workouts, monitor BMI and calories, log meals and hydration, and focus on targeted muscle development. Designed with best practices in fitness tech.</p>
+        <p style="margin-top:20px;">Inspired by: MyFitnessPal, Strong App, Fitbod.</p>
       </section>
 
       <!-- <form action="{{ url_for('logout') }}">
@@ -853,12 +1204,18 @@
     }
 
     // Workout Plans
+    // Future Feature Ideas:
+    // - Sync with wearable data
+    // - AI-generated training plans
+    // - Community leaderboard integration
+    // - Dynamic progress prediction with ML
+
     const plans = {
-      Monday: 'Push Day: Bench Press, Shoulder Press, Tricep Dips, Push-ups',
-      Tuesday: 'Pull Day: Deadlifts, Pull-ups, Barbell Rows, Bicep Curls',
-      Wednesday: 'Leg Day: Squats, Lunges, Calf Raises, Leg Press',
-      Thursday: 'HIIT & Core: Burpees, Mountain Climbers, Planks, Russian Twists',
-      Friday: 'Full Body: Kettlebell Swings, Jump Squats, Battle Ropes, Thrusters'
+      Monday: 'Push Day: Bench Press, Shoulder Press, Tricep Dips. 🏋️‍♂️ Focus: Strength<br>Suggested Rest: 1 min between sets<br>Tags: <span style="color:#00ff99;">Strength</span>',
+      Tuesday: 'Pull Day: Deadlifts, Pull-ups, Barbell Rows, Bicep Curls. 🏋️‍♂️ Focus: Strength<br>Suggested Rest: 90 sec<br>Tags: <span style="color:#00ff99;">Strength</span>',
+      Wednesday: 'Leg Day: Squats, Lunges, Calf Raises, Leg Press. 🏃‍♂️ Focus: Strength & Mobility<br>Suggested Rest: 2 min<br>Tags: <span style="color:#00ff99;">Strength</span>, <span style="color:#ffd43b;">Mobility</span>',
+      Thursday: 'HIIT & Core: Burpees, Mountain Climbers, Planks, Russian Twists. 🏃‍♂️ Focus: Cardio<br>Suggested Rest: 30 sec<br>Tags: <span style="color:#2196f3;">Cardio</span>, <span style="color:#ffd43b;">Mobility</span>',
+      Friday: 'Full Body: Kettlebell Swings, Jump Squats, Battle Ropes, Thrusters. 💪 Focus: Strength & Cardio<br>Suggested Rest: 1 min<br>Tags: <span style="color:#00ff99;">Strength</span>, <span style="color:#2196f3;">Cardio</span>'
     };
 
     function showPlan() {
@@ -921,93 +1278,6 @@
       cupsInput.value = '';
     }
 
-    // Muscle Viewer with Konva
-    const dayToMuscles = {
-      Monday: ['chest', 'triceps', 'shoulders'],
-      Tuesday: ['back', 'biceps'],
-      Wednesday: ['quads', 'calves'],
-      Thursday: ['core', 'chest', 'back'],
-      Friday: ['shoulders', 'core', 'quads', 'biceps']
-    };
-
-    let stage, layer, muscleShapes = {};
-
-    function initMuscleViewer() {
-      if (stage) return;
-
-      const container = document.getElementById('muscle-stage');
-      if (!container) {
-        console.error('Muscle stage container not found');
-        return;
-      }
-
-      stage = new Konva.Stage({
-        container: 'muscle-stage',
-        width: container.offsetWidth || 400,
-        height: 400,
-        draggable: true
-      });
-      layer = new Konva.Layer();
-      stage.add(layer);
-
-      const muscleDefs = {
-        chest: { draw: () => new Konva.Ellipse({ x: 200, y: 120, radiusX: 80, radiusY: 40 }), tooltip: 'Chest: Bench Press, Push-ups' },
-        back: { draw: () => new Konva.Rect({ x: 160, y: 160, width: 80, height: 120 }), tooltip: 'Back: Deadlifts, Rows' },
-        biceps: { draw: () => new Konva.Circle({ x: 130, y: 100, radius: 25 }), tooltip: 'Biceps: Curls, Pull-ups' },
-        triceps: { draw: () => new Konva.Circle({ x: 270, y: 100, radius: 25 }), tooltip: 'Triceps: Dips, Close-grip Press' },
-        quads: { draw: () => new Konva.Rect({ x: 170, y: 260, width: 60, height: 100 }), tooltip: 'Quads: Squats, Lunges' },
-        calves: { draw: () => new Konva.Rect({ x: 180, y: 340, width: 40, height: 50 }), tooltip: 'Calves: Calf Raises' },
-        shoulders: { draw: () => new Konva.RegularPolygon({ x: 200, y: 70, sides: 3, radius: 30 }), tooltip: 'Shoulders: Overhead Press' },
-        core: { draw: () => new Konva.Ellipse({ x: 200, y: 180, radiusX: 50, radiusY: 60 }), tooltip: 'Core: Planks, Crunches' }
-      };
-
-      const tooltipDiv = document.getElementById('tooltip');
-
-      for (const [id, def] of Object.entries(muscleDefs)) {
-        const shape = def.draw();
-        shape.id(id);
-        shape.fill('#444');
-        shape.listening(true);
-        layer.add(shape);
-        muscleShapes[id] = shape;
-
-        shape.on('mouseover', () => {
-          tooltipDiv.style.opacity = 1;
-          tooltipDiv.innerHTML = def.tooltip;
-          shape.to({ scaleX: 1.1, scaleY: 1.1, duration: 0.2 });
-        });
-
-        shape.on('mousemove', e => {
-          tooltipDiv.style.left = e.evt.clientX + 10 + 'px';
-          tooltipDiv.style.top = e.evt.clientY + 10 + 'px';
-        });
-
-        shape.on('mouseout', () => {
-          tooltipDiv.style.opacity = 0;
-          shape.to({ scaleX: 1, scaleY: 1, duration: 0.2 });
-        });
-      }
-
-      layer.draw();
-
-      const muscleDaySelect = document.getElementById('muscle-day-select');
-      if (muscleDaySelect) {
-        highlightMuscles(muscleDaySelect.value);
-      }
-    }
-
-    function highlightMuscles(day) {
-      if (!muscleShapes || Object.keys(muscleShapes).length === 0) return;
-      
-      const targets = dayToMuscles[day] || [];
-      for (const [id, shape] of Object.entries(muscleShapes)) {
-        shape.to({
-          fill: targets.includes(id) ? '#00ff99' : '#444',
-          duration: 0.5
-        });
-      }
-      if (layer) layer.draw();
-    }
 
     // Initialize workout plan on page load
     document.addEventListener('DOMContentLoaded', function() {
@@ -1073,3 +1343,31 @@
     <button type="submit" style="background-color: #d63031; color: #fff;">Logout</button>
   </form>
 </div> -->
+    // Progress Chart Range Switcher
+    function updateProgressChart() {
+      const range = document.getElementById('progress-range').value;
+      if (chart) {
+        if (range === 'month') {
+          chart.data.labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+          chart.data.datasets[0].data = [100, 140, 160, 190];
+          chart.data.datasets[1].data = [80, 79, 77.5, 76];
+        } else {
+          chart.data.labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+          chart.data.datasets[0].data = [20, 25, 30, 35, 40];
+          chart.data.datasets[1].data = [78.5, 78.4, 78.3, 78.2, 78.0];
+        }
+        chart.update();
+      }
+    }
+
+    // Theme toggle
+    function toggleTheme() {
+      document.body.classList.toggle('light-mode');
+      localStorage.setItem('fitzone-theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('fitzone-theme') === 'light') {
+        document.body.classList.add('light-mode');
+      }
+    });
