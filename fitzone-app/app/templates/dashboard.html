@@ -26,16 +26,28 @@
       --active: #44c767;
     }
     .theme-toggle {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: none;
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background-color: var(--card);
       border: 2px solid var(--accent);
-      padding: 8px 16px;
-      border-radius: 6px;
       color: var(--accent);
-      font-weight: bold;
+      font-size: 20px;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      box-shadow: 0 0 5px var(--accent);
+      transition: background-color 0.3s ease;
+    }
+
+    .theme-toggle:hover {
+      background-color: var(--accent);
+      color: var(--bg);
     }
 
     * {
@@ -361,9 +373,9 @@
   <script src="https://unpkg.com/konva@9.3.13/konva.min.js"></script>
 </head>
 <body>
+  <button onclick="toggleTheme()" class="theme-toggle" title="Toggle theme">🌗</button>
   <header class="header" style="position: relative;">
-    <h1>🏋️ FITZONE Dashboard</h1>
-    <button onclick="toggleTheme()" class="theme-toggle">🌗 Toggle Theme</button>
+    <h1 style="font-size: 2.75rem; color: var(--accent); text-shadow: 0 0 12px var(--accent);">🏋️ FITZONE</h1>
     <nav class="nav-menu">
       <div class="nav-item active" onclick="showSection('welcome')">
         <div class="nav-icon">🏠</div>
@@ -400,10 +412,6 @@
       <div class="nav-item" onclick="showSection('progress')">
         <div class="nav-icon">📊</div>
         <div class="nav-label">Progress</div>
-      </div>
-      <div class="nav-item" onclick="showSection('muscles')">
-        <div class="nav-icon">🏋️</div>
-        <div class="nav-label">Muscles</div>
       </div>
       <!-- About nav item -->
       <div class="nav-item" onclick="showSection('about')">
@@ -677,276 +685,6 @@
         </div>
       </section>
 
-      <!-- Muscle Focus Section (SVG Interactive) -->
-      <section id="muscles" class="section">
-        <h2>Muscle Focus Viewer</h2>
-        <style>
-          .muscle-svg-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 2rem;
-            margin-top: 1.5rem;
-          }
-          .svg-human-diagram {
-            width: 320px;
-            max-width: 100vw;
-            height: 480px;
-            display: block;
-            background: #181818;
-            border-radius: 16px;
-            box-shadow: 0 0 24px rgba(0,224,255,0.12);
-          }
-          .muscle-group {
-            cursor: pointer;
-            transition: fill 0.25s, stroke 0.25s;
-            stroke: #00e0ff;
-            stroke-width: 0;
-          }
-          .muscle-group[data-active="true"] {
-            fill: #00ff99 !important;
-            stroke: #00e0ff;
-            stroke-width: 2;
-            filter: drop-shadow(0 0 6px #00ff99aa);
-          }
-          .muscle-group[data-selected="true"] {
-            fill: #ffb703 !important;
-            stroke: #ffb703;
-            stroke-width: 3;
-            filter: drop-shadow(0 0 8px #ffb703cc);
-          }
-          .muscle-group[data-focused="true"] {
-            fill: #00e0ff !important;
-            stroke: #00e0ff;
-            stroke-width: 4;
-            filter: drop-shadow(0 0 12px #00e0ffcc);
-          }
-          .muscle-panel {
-            background: var(--card);
-            border-radius: 12px;
-            min-width: 240px;
-            max-width: 320px;
-            padding: 1rem 1.5rem;
-            color: var(--text);
-            box-shadow: 0 0 16px rgba(0,224,255,0.08);
-            border: 1px solid var(--accent);
-          }
-          .muscle-panel h3 {
-            color: var(--active);
-            margin-bottom: 0.5rem;
-            font-size: 1.3rem;
-          }
-          .muscle-panel ul {
-            margin: 0.5rem 0 0 0;
-            padding-left: 1.25rem;
-            color: var(--text);
-            font-size: 1rem;
-          }
-          .muscle-panel .desc {
-            color: #b2f7ef;
-            font-size: 1.05rem;
-            margin-bottom: 0.75rem;
-          }
-        </style>
-        <div style="text-align:center; margin-bottom:12px;">
-          <span style="font-size:1.2rem; color:var(--active); font-weight:bold;">Visualize Your Target Muscles</span>
-        </div>
-        <p style="text-align: center; margin-bottom: 18px;">Select a workout day to see targeted muscle groups. Click a muscle for details!</p>
-        <div class="form-group" style="max-width: 300px; margin: 0 auto 1rem auto;">
-          <label for="muscle-day-select">Select Day</label>
-          <select id="muscle-day-select">
-            <option>Monday</option>
-            <option>Tuesday</option>
-            <option>Wednesday</option>
-            <option>Thursday</option>
-            <option>Friday</option>
-          </select>
-        </div>
-        <div class="muscle-svg-container">
-          <svg class="svg-human-diagram" viewBox="0 0 240 360" xmlns="http://www.w3.org/2000/svg">
-            <!-- Arms (background) -->
-            <ellipse cx="60" cy="90" rx="24" ry="48" fill="#333" />
-            <ellipse cx="180" cy="90" rx="24" ry="48" fill="#333" />
-            <!-- Shoulders -->
-            <ellipse class="muscle-group" id="shoulders" data-muscle="shoulders" cx="60" cy="62" rx="18" ry="18" fill="#444" />
-            <ellipse class="muscle-group" id="shoulders-r" data-muscle="shoulders" cx="180" cy="62" rx="18" ry="18" fill="#444" />
-            <!-- Biceps -->
-            <ellipse class="muscle-group" id="biceps" data-muscle="biceps" cx="60" cy="100" rx="13" ry="22" fill="#444" />
-            <ellipse class="muscle-group" id="biceps-r" data-muscle="biceps" cx="180" cy="100" rx="13" ry="22" fill="#444" />
-            <!-- Triceps -->
-            <ellipse class="muscle-group" id="triceps" data-muscle="triceps" cx="60" cy="140" rx="13" ry="20" fill="#444" />
-            <ellipse class="muscle-group" id="triceps-r" data-muscle="triceps" cx="180" cy="140" rx="13" ry="20" fill="#444" />
-            <!-- Chest -->
-            <ellipse class="muscle-group" id="chest" data-muscle="chest" cx="120" cy="80" rx="38" ry="24" fill="#444" />
-            <!-- Core (abs) -->
-            <rect class="muscle-group" id="core" data-muscle="core" x="96" y="110" width="48" height="60" rx="16" fill="#444" />
-            <!-- Back (upper) -->
-            <rect class="muscle-group" id="back" data-muscle="back" x="80" y="170" width="80" height="34" rx="16" fill="#444" />
-            <!-- Quads -->
-            <rect class="muscle-group" id="quads" data-muscle="quads" x="97" y="210" width="22" height="60" rx="10" fill="#444" />
-            <rect class="muscle-group" id="quads-r" data-muscle="quads" x="121" y="210" width="22" height="60" rx="10" fill="#444" />
-            <!-- Calves -->
-            <rect class="muscle-group" id="calves" data-muscle="calves" x="99" y="272" width="16" height="40" rx="8" fill="#444" />
-            <rect class="muscle-group" id="calves-r" data-muscle="calves" x="125" y="272" width="16" height="40" rx="8" fill="#444" />
-            <!-- Outline/body -->
-            <ellipse cx="120" cy="50" rx="30" ry="30" fill="#222" />
-            <rect x="90" y="80" width="60" height="180" rx="28" fill="#222" />
-            <rect x="97" y="260" width="22" height="56" rx="10" fill="#222" />
-            <rect x="121" y="260" width="22" height="56" rx="10" fill="#222" />
-          </svg>
-          <div class="muscle-panel" id="muscle-panel">
-            <h3>Muscle Group Info</h3>
-            <div class="desc">Select a muscle to see details, tips, and exercises.</div>
-            <div id="muscle-details">
-              <strong>Tip:</strong> Choose a workout day to highlight your focus areas.
-            </div>
-          </div>
-        </div>
-        <script>
-        // Muscle group data (name, description, exercises)
-        const muscleData = {
-          chest: {
-            name: "Chest",
-            desc: "The pectoral muscles are responsible for pushing movements.",
-            exercises: ["Bench Press", "Push-ups", "Chest Fly", "Incline Press"]
-          },
-          back: {
-            name: "Back",
-            desc: "The back muscles support pulling and posture.",
-            exercises: ["Deadlifts", "Pull-ups", "Barbell Rows", "Lat Pulldown"]
-          },
-          biceps: {
-            name: "Biceps",
-            desc: "Biceps are used for curling and pulling movements.",
-            exercises: ["Bicep Curls", "Chin-ups", "Hammer Curl"]
-          },
-          triceps: {
-            name: "Triceps",
-            desc: "Triceps are key for extending the arm.",
-            exercises: ["Tricep Dips", "Overhead Extension", "Close-grip Bench"]
-          },
-          shoulders: {
-            name: "Shoulders",
-            desc: "Deltoids help with lifting and overhead movements.",
-            exercises: ["Overhead Press", "Lateral Raise", "Front Raise"]
-          },
-          core: {
-            name: "Core",
-            desc: "Core muscles stabilize the body and support balance.",
-            exercises: ["Planks", "Crunches", "Russian Twist", "Leg Raise"]
-          },
-          quads: {
-            name: "Quads",
-            desc: "Quadriceps power knee extension and squatting.",
-            exercises: ["Squats", "Lunges", "Leg Press"]
-          },
-          calves: {
-            name: "Calves",
-            desc: "Calf muscles are important for ankle movement and stability.",
-            exercises: ["Calf Raises", "Jump Rope", "Seated Calf Press"]
-          }
-        };
-        // Day-to-muscle mapping
-        const dayToMuscles = {
-          Monday: ['chest', 'triceps', 'shoulders'],
-          Tuesday: ['back', 'biceps'],
-          Wednesday: ['quads', 'calves'],
-          Thursday: ['core', 'chest', 'back'],
-          Friday: ['shoulders', 'core', 'quads', 'biceps']
-        };
-        // All SVG muscle elements (grouped by main muscle)
-        const muscleSvgIds = {
-          chest: ['chest'],
-          back: ['back'],
-          biceps: ['biceps', 'biceps-r'],
-          triceps: ['triceps', 'triceps-r'],
-          shoulders: ['shoulders', 'shoulders-r'],
-          core: ['core'],
-          quads: ['quads', 'quads-r'],
-          calves: ['calves', 'calves-r']
-        };
-        let selectedMuscle = null;
-        // Helper: set attribute for all SVG elements of a muscle
-        function setMuscleAttr(muscle, attr, value) {
-          (muscleSvgIds[muscle]||[]).forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.setAttribute(attr, value);
-          });
-        }
-        // Helper: clear all highlight attrs
-        function clearMuscleAttrs() {
-          Object.keys(muscleSvgIds).forEach(m => {
-            setMuscleAttr(m, 'data-active', 'false');
-            setMuscleAttr(m, 'data-selected', 'false');
-            setMuscleAttr(m, 'data-focused', 'false');
-          });
-        }
-        // Highlight muscles for selected day
-        function highlightMusclesSVG(day) {
-          clearMuscleAttrs();
-          // Highlight today's focus
-          (dayToMuscles[day]||[]).forEach(m => setMuscleAttr(m, 'data-active', 'true'));
-          // If a muscle is selected, keep it highlighted as selected/focused
-          if (selectedMuscle) {
-            setMuscleAttr(selectedMuscle, 'data-selected', 'true');
-            setMuscleAttr(selectedMuscle, 'data-focused', 'true');
-          }
-        }
-        // Update muscle info panel
-        function showMusclePanel(muscle) {
-          const panel = document.getElementById('muscle-panel');
-          const details = document.getElementById('muscle-details');
-          if (!muscleData[muscle]) {
-            details.innerHTML = `<strong>Tip:</strong> Choose a workout day to highlight your focus areas.`;
-            panel.querySelector('h3').textContent = 'Muscle Group Info';
-            panel.querySelector('.desc').textContent = 'Select a muscle to see details, tips, and exercises.';
-            return;
-          }
-          const d = muscleData[muscle];
-          panel.querySelector('h3').textContent = d.name;
-          panel.querySelector('.desc').textContent = d.desc;
-          details.innerHTML = `<strong>Sample Exercises:</strong><ul>` +
-            d.exercises.map(e => `<li>${e}</li>`).join('') +
-            `</ul>`;
-        }
-        // Setup listeners
-        document.addEventListener('DOMContentLoaded', function() {
-          // Initial highlight
-          const selDay = document.getElementById('muscle-day-select');
-          highlightMusclesSVG(selDay.value);
-          // Day selector
-          selDay.addEventListener('change', function() {
-            highlightMusclesSVG(this.value);
-            // If selected muscle is not on this day's focus, keep it highlighted
-          });
-          // Click handlers for muscles
-          Object.keys(muscleSvgIds).forEach(muscle => {
-            (muscleSvgIds[muscle]||[]).forEach(id => {
-              const el = document.getElementById(id);
-              if (!el) return;
-              el.addEventListener('click', function() {
-                // Deselect previous
-                selectedMuscle = muscle;
-                highlightMusclesSVG(selDay.value);
-                showMusclePanel(muscle);
-              });
-              el.addEventListener('mouseenter', function() {
-                setMuscleAttr(muscle, 'data-focused', 'true');
-              });
-              el.addEventListener('mouseleave', function() {
-                // Only remove if not selected
-                if (selectedMuscle !== muscle)
-                  setMuscleAttr(muscle, 'data-focused', 'false');
-              });
-            });
-          });
-          // On initial load, show default panel
-          showMusclePanel(null);
-        });
-        </script>
-      </section>
-
       <!-- About Section -->
       <section id="about" class="section">
         <h2>About FITZONE</h2>
@@ -961,6 +699,20 @@
   </main>
 
   <script>
+    // Load saved theme on page load before anything else
+    (function() {
+      const savedTheme = localStorage.getItem('fitzone-theme');
+      if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+      }
+    })();
+
+    function toggleTheme() {
+      document.body.classList.toggle('light-mode');
+      const theme = document.body.classList.contains('light-mode') ? 'light' : 'dark';
+      localStorage.setItem('fitzone-theme', theme);
+    }
+
     // Navigation functionality
     function showSection(sectionId) {
       // Hide all sections
@@ -992,8 +744,6 @@
       try {
         if (sectionId === 'progress' && !chart) {
           initProgressChart();
-        } else if (sectionId === 'muscles' && !stage) {
-          initMuscleViewer();
         } else if (sectionId === 'workout') {
           showPlan();
         }
@@ -1137,6 +887,23 @@
           }
         }
       });
+    }
+
+    // Progress Chart Range Switcher
+    function updateProgressChart() {
+      const range = document.getElementById('progress-range').value;
+      if (chart) {
+        if (range === 'month') {
+          chart.data.labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+          chart.data.datasets[0].data = [100, 140, 160, 190];
+          chart.data.datasets[1].data = [80, 79, 77.5, 76];
+        } else {
+          chart.data.labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+          chart.data.datasets[0].data = [20, 25, 30, 35, 40];
+          chart.data.datasets[1].data = [78.5, 78.4, 78.3, 78.2, 78.0];
+        }
+        chart.update();
+      }
     }
 
     // Rep Tracker
@@ -1343,31 +1110,3 @@
     <button type="submit" style="background-color: #d63031; color: #fff;">Logout</button>
   </form>
 </div> -->
-    // Progress Chart Range Switcher
-    function updateProgressChart() {
-      const range = document.getElementById('progress-range').value;
-      if (chart) {
-        if (range === 'month') {
-          chart.data.labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
-          chart.data.datasets[0].data = [100, 140, 160, 190];
-          chart.data.datasets[1].data = [80, 79, 77.5, 76];
-        } else {
-          chart.data.labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-          chart.data.datasets[0].data = [20, 25, 30, 35, 40];
-          chart.data.datasets[1].data = [78.5, 78.4, 78.3, 78.2, 78.0];
-        }
-        chart.update();
-      }
-    }
-
-    // Theme toggle
-    function toggleTheme() {
-      document.body.classList.toggle('light-mode');
-      localStorage.setItem('fitzone-theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      if (localStorage.getItem('fitzone-theme') === 'light') {
-        document.body.classList.add('light-mode');
-      }
-    });
