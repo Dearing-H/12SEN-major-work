@@ -273,6 +273,14 @@ def dashboard():
         meal_logs = db_session.query(MealLog).filter_by(user_id=user.id).order_by(MealLog.id.desc()).limit(5).all()
         water_logs = db_session.query(WaterIntake).filter_by(user_id=user.id).order_by(WaterIntake.id.desc()).limit(5).all()
 
+        # Prepare data for progress chart
+        recent_exercise = db_session.query(ExerciseLog).filter_by(user_id=user.id).order_by(ExerciseLog.id.desc()).limit(4).all()
+        recent_weights = db_session.query(BMIR).filter_by(user_id=user.id).order_by(BMIR.id.desc()).limit(4).all()
+
+        progress_labels = [log.date.strftime('%b %d') if hasattr(log, 'date') else f'Entry {i+1}' for i, log in enumerate(reversed(recent_exercise))]
+        progress_reps = [log.total_reps for log in reversed(recent_exercise)]
+        progress_weight = [log.weight for log in reversed(recent_weights)]
+
         return render_template(
             "dashboard.html",
             user=user,
@@ -280,7 +288,10 @@ def dashboard():
             calorie_records=calorie_records,
             exercise_logs=exercise_logs,
             meal_logs=meal_logs,
-            water_logs=water_logs
+            water_logs=water_logs,
+            progress_labels=progress_labels,
+            progress_reps=progress_reps,
+            progress_weight=progress_weight
         )
     finally:
         db_session.close()
