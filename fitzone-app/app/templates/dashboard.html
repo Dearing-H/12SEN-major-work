@@ -729,6 +729,9 @@
   </main>
 
   <script>
+    // NOTE: Replace 'YOUR_OPENAI_API_KEY_HERE' with your actual OpenAI key before running locally.
+    // Do NOT commit your real API key to GitHub.
+
     // Load saved theme on page load before anything else
     (function() {
       const savedTheme = localStorage.getItem('fitzone-theme');
@@ -1070,7 +1073,7 @@
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer YOUR_OPENAI_API_KEY_HERE"
+            Authorization: "Bearer YOUR_OPENAI_API_KEY_HERE" // <- Replace this locally before running
           },
           body: JSON.stringify({
             model: "gpt-3.5-turbo",
@@ -1188,7 +1191,7 @@
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer YOUR_OPENAI_API_KEY_HERE",
+          Authorization: "Bearer YOUR_OPENAI_API_KEY_HERE" // <- Replace this locally before running
         },
         body: JSON.stringify({
           model: "gpt-4",
