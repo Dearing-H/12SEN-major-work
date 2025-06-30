@@ -573,6 +573,14 @@
               </div>
               <button type="submit" name="meal_submit">Log Meal 🍴</button>
             </form>
+            <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--accent);">
+            <!-- AI Meal Plan Generator -->
+            <div class="form-group">
+              <label for="meal-goal">AI Meal Plan Generator</label>
+              <input type="text" id="meal-goal" placeholder="e.g., high protein, weight loss" aria-label="Meal goal or preference" style="margin-bottom: 8px;" />
+              <button type="button" onclick="generateMeals()">Generate Meals with Nutrition 🤖</button>
+            </div>
+            <div class="result" id="meal-output" style="margin-top: 1rem;">Your AI meal plan will appear here.</div>
           </div>
           <div>
             <h3 style="color: var(--accent); margin-bottom: 1rem;">Today's Meals</h3>
@@ -620,16 +628,26 @@
       <section id="workout" class="section">
         <h2>Weekly Workout Plan</h2>
         <div class="form-group">
-          <label for="day-select">Select Day</label>
-          <select id="day-select" onchange="showPlan()">
-            <option>Monday</option>
-            <option>Tuesday</option>
-            <option>Wednesday</option>
-            <option>Thursday</option>
-            <option>Friday</option>
+          <label for="workout-day">Select Day</label>
+          <select id="workout-day" name="workout-day" onchange="displayWorkoutForDay()" aria-label="Select workout day">
+            <option value="" disabled selected>Select a day</option>
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
           </select>
         </div>
+        <div style="margin: 1rem 0;">
+          <button type="button" onclick="togglePlanSource()" id="toggle-plan-btn">Switch to AI Plan 🤖</button>
+        </div>
         <div class="result" id="plan-output">Select a day to view your workout plan</div>
+        <div id="ai-plan-block" style="margin-top: 1.5rem; display: none;">
+          <label for="ai-goal">Enter your fitness goal:</label>
+          <input type="text" id="ai-goal" placeholder="e.g., build muscle, lose fat, etc." style="width: 100%; padding: 10px; margin-top: 8px;" />
+          <button onclick="generateAIWorkout()" style="margin-top: 10px;">Create AI Workout Plan 🤖</button>
+          <div class="result" id="ai-workout-output" style="margin-top: 1rem;">Your AI-powered plan will appear here.</div>
+        </div>
       </section>
 
       <!-- Water Tracker Section -->
@@ -678,6 +696,18 @@
               You've lost 3 kg – great job!
             </div>
             <div style="margin-top: 1rem; color: var(--text); font-weight: bold;">🏋️ Reps today: 0</div>
+            <!-- Nutrition Summary Block -->
+            <div class="card" style="margin-top: 1rem;">
+              <h2 style="margin-bottom: 0.5rem;">🍽️ Daily Nutrition Summary</h2>
+              <div id="nutrition-summary" style="font-family: monospace; line-height: 1.6;">
+                <p><strong>Calories:</strong> 2200 kcal</p>
+                <p><strong>Protein:</strong> 150g</p>
+                <p><strong>Carbs:</strong> 180g</p>
+                <p><strong>Fats:</strong> 70g</p>
+                <p style="font-size: 0.85rem; color: gray;">(Sample totals – update based on meal logs)</p>
+              </div>
+            </div>
+            <!-- End Nutrition Summary Block -->
           </div>
           <div>
             <canvas id="nutritionChart" width="400" height="300"></canvas>
@@ -977,30 +1007,105 @@
     // - Community leaderboard integration
     // - Dynamic progress prediction with ML
 
-    const plans = {
+    // --- Workout Plan Toggle and Display Logic ---
+    const defaultPlans = {
       Monday: 'Push Day: Bench Press, Shoulder Press, Tricep Dips. 🏋️‍♂️ Focus: Strength<br>Suggested Rest: 1 min between sets<br>Tags: <span style="color:#00ff99;">Strength</span>',
       Tuesday: 'Pull Day: Deadlifts, Pull-ups, Barbell Rows, Bicep Curls. 🏋️‍♂️ Focus: Strength<br>Suggested Rest: 90 sec<br>Tags: <span style="color:#00ff99;">Strength</span>',
       Wednesday: 'Leg Day: Squats, Lunges, Calf Raises, Leg Press. 🏃‍♂️ Focus: Strength & Mobility<br>Suggested Rest: 2 min<br>Tags: <span style="color:#00ff99;">Strength</span>, <span style="color:#ffd43b;">Mobility</span>',
       Thursday: 'HIIT & Core: Burpees, Mountain Climbers, Planks, Russian Twists. 🏃‍♂️ Focus: Cardio<br>Suggested Rest: 30 sec<br>Tags: <span style="color:#2196f3;">Cardio</span>, <span style="color:#ffd43b;">Mobility</span>',
       Friday: 'Full Body: Kettlebell Swings, Jump Squats, Battle Ropes, Thrusters. 💪 Focus: Strength & Cardio<br>Suggested Rest: 1 min<br>Tags: <span style="color:#00ff99;">Strength</span>, <span style="color:#2196f3;">Cardio</span>'
     };
+    let useAIPlan = false;
+    let aiPlanCache = {};
 
-    function showPlan() {
-      const daySelect = document.getElementById('day-select');
-      if (!daySelect) return;
-      
-      const day = daySelect.value;
+    function togglePlanSource() {
+      useAIPlan = !useAIPlan;
+      document.getElementById('toggle-plan-btn').textContent = useAIPlan ? 'Switch to Default Plan 📝' : 'Switch to AI Plan 🤖';
+      document.getElementById('ai-plan-block').style.display = useAIPlan ? 'block' : 'none';
+      displayWorkoutForDay();
+    }
+
+    function displayWorkoutForDay() {
+      const daySelect = document.getElementById('workout-day');
+      const day = daySelect ? daySelect.value : '';
       const planOutput = document.getElementById('plan-output');
-      
-      if (!plans[day]) {
-        planOutput.textContent = 'No workout plan available for this day';
+      if (!day) {
+        planOutput.textContent = 'Select a day to view your workout plan';
         return;
       }
-      
-      planOutput.innerHTML = `
-        <div><strong>${day} Workout:</strong></div>
-        <div style="margin-top: 10px;">${plans[day]}</div>
-      `;
+      if (useAIPlan) {
+        if (aiPlanCache[day]) {
+          planOutput.innerHTML = `<div><strong>${day} (AI Plan):</strong></div><div style="margin-top: 10px;">${aiPlanCache[day]}</div>`;
+        } else {
+          planOutput.innerHTML = `<div><strong>${day} (AI Plan):</strong></div><div style="margin-top: 10px; color:#aaa;">No AI plan generated for this day yet. Enter your goal and generate one below.</div>`;
+        }
+      } else {
+        if (defaultPlans[day]) {
+          planOutput.innerHTML = `<div><strong>${day} Workout:</strong></div><div style="margin-top: 10px;">${defaultPlans[day]}</div>`;
+        } else {
+          planOutput.textContent = 'No workout plan available for this day';
+        }
+      }
+    }
+
+    // AI Workout Plan Generator
+    async function generateAIWorkout() {
+      const goal = document.getElementById('ai-goal').value.trim();
+      const output = document.getElementById('ai-workout-output');
+      const daySelect = document.getElementById('workout-day');
+      const day = daySelect ? daySelect.value : '';
+      if (!goal) {
+        output.textContent = 'Please enter a fitness goal.';
+        return;
+      }
+      if (!day) {
+        output.textContent = 'Please select a day above to generate an AI plan for.';
+        return;
+      }
+      output.textContent = 'Generating workout...';
+
+      try {
+        // Replace with your actual OpenAI API key before running locally or in production
+        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer YOUR_OPENAI_API_KEY_HERE"
+          },
+          body: JSON.stringify({
+            model: "gpt-3.5-turbo",
+            messages: [
+              {
+                role: "system",
+                content: "You are a certified fitness trainer. Generate a full workout plan based on the user's fitness goal."
+              },
+              {
+                role: "user",
+                content: `Create a workout plan for ${day} to help me: ${goal}`
+              }
+            ]
+          })
+        });
+
+        const data = await response.json();
+        const planText = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content
+          ? data.choices[0].message.content
+          : "No AI plan available.";
+        output.innerHTML = `<pre style="white-space: pre-wrap;">${planText}</pre>`;
+        aiPlanCache[day] = planText;
+        displayWorkoutForDay();
+        // Send the generated workout to the Flask backend
+        await fetch("/save_ai_workout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ workout_plan: planText })
+        });
+      } catch (error) {
+        output.textContent = 'Error generating workout plan. Please try again.';
+        console.error(error);
+      }
     }
 
     // Water Tracker
@@ -1046,7 +1151,7 @@
     }
 
 
-    // Initialize workout plan on page load
+    // Initialize workout plan UI on page load
     document.addEventListener('DOMContentLoaded', function() {
       const hash = window.location.hash.substring(1);
       if (hash) {
@@ -1054,59 +1159,96 @@
         if (navItem) {
           navItem.click();
         }
-      } else {
-        showPlan();
       }
+      displayWorkoutForDay();
     });
   </script>
 </body>
 </html>
 
 <!-- Forms Section (for saving/logging data and logout)
-<div style="max-width: 500px; margin: 40px auto 0 auto;">
-  <form method="POST" style="margin-bottom: 1.5rem;">
-    <h2 style="color: var(--accent); margin-bottom: 1rem;">BMI Calculator</h2>
-    <input type="number" name="weight" placeholder="Weight (kg)" step="0.1" required>
-    <input type="number" name="height" placeholder="Height (cm)" step="0.1" required>
-    <button type="submit" name="bmi_submit">Save BMI</button>
-  </form>
+... (intentionally left commented out) ...
+-->
+  <script>
+    // ...existing code above...
 
-  <form method="POST" style="margin-bottom: 1.5rem;">
-    <h2 style="color: var(--accent); margin-bottom: 1rem;">Calorie Tracker</h2>
-    <input type="number" name="age" placeholder="Age" required>
-    <input type="number" name="c_weight" placeholder="Weight (kg)" step="0.1" required>
-    <input type="number" name="c_height" placeholder="Height (cm)" step="0.1" required>
-    <select name="activity" required>
-      <option value="1.2">Sedentary</option>
-      <option value="1.375">Lightly active</option>
-      <option value="1.55">Moderately active</option>
-      <option value="1.725">Very active</option>
-      <option value="1.9">Extra active</option>
-    </select>
-    <button type="submit" name="calorie_submit">Save Calories</button>
-  </form>
+    // AI Meal Plan Generator with Macronutrient Details
+    function generateMeals() {
+      const goal = document.getElementById("meal-goal").value.trim();
+      if (!goal) {
+        alert("Please enter a goal or preference (e.g., high protein, weight loss).");
+        return;
+      }
 
-  <form method="POST" style="margin-bottom: 1.5rem;">
-    <h2 style="color: var(--accent); margin-bottom: 1rem;">Exercise Log</h2>
-    <input type="text" name="exercise" placeholder="Exercise Name" required>
-    <input type="number" name="reps" placeholder="Reps" required>
-    <input type="number" name="sets" placeholder="Sets" required>
-    <button type="submit" name="exercise_submit">Log Exercise</button>
-  </form>
+      const output = document.getElementById("meal-output");
+      output.textContent = "Generating meals with nutritional breakdown...";
 
-  <form method="POST" style="margin-bottom: 1.5rem;">
-    <h2 style="color: var(--accent); margin-bottom: 1rem;">Meal Log</h2>
-    <input type="text" name="meal" placeholder="Meal Description" required>
-    <button type="submit" name="meal_submit">Log Meal</button>
-  </form>
+      // Replace with your actual OpenAI API key before running locally or in production
+      fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer YOUR_OPENAI_API_KEY_HERE",
+        },
+        body: JSON.stringify({
+          model: "gpt-4",
+          messages: [
+            {
+              role: "system",
+              content: "You are a nutrition assistant who generates daily meal plans and includes detailed macronutrient information per meal. Return all meals clearly formatted.",
+            },
+            {
+              role: "user",
+              content: `Create a daily meal plan for this fitness goal: ${goal}. Include total calories and grams of carbs, protein, and fat per meal.`,
+            },
+          ],
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          const response = data.choices[0].message.content;
+          output.innerHTML = `<pre style="white-space: pre-wrap; background:#1e1e1e; color:#fff; padding:1rem; border-radius:8px;">${response}</pre>`;
 
-  <form method="POST" style="margin-bottom: 1.5rem;">
-    <h2 style="color: var(--accent); margin-bottom: 1rem;">Water Intake</h2>
-    <input type="number" name="cups" placeholder="Cups of Water" required>
-    <button type="submit" name="water_submit">Log Water</button>
-  </form>
+          // Extract macros from the response
+          const caloriesMatch = response.match(/Calories:\s*(\d+)/i);
+          const proteinMatch = response.match(/Protein:\s*(\d+)/i);
+          const carbsMatch = response.match(/Carbs:\s*(\d+)/i);
+          const fatsMatch = response.match(/Fats?:\s*(\d+)/i);
 
-  <form action="{{ url_for('logout') }}">
-    <button type="submit" style="background-color: #d63031; color: #fff;">Logout</button>
-  </form>
-</div> -->
+          if (caloriesMatch && proteinMatch && carbsMatch && fatsMatch) {
+            const nutritionData = {
+              calories: parseInt(caloriesMatch[1]),
+              protein: parseInt(proteinMatch[1]),
+              carbs: parseInt(carbsMatch[1]),
+              fats: parseInt(fatsMatch[1])
+            };
+
+            // Save nutrition to server
+            fetch("/save_nutrition", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(nutritionData)
+            })
+            .then(() => {
+              // After saving nutrition, fetch and update the daily nutrition summary
+              fetch("/get_nutrition_summary")
+                .then((res) => res.json())
+                .then((summary) => {
+                  const ns = document.getElementById("nutrition-summary");
+                  ns.innerHTML = `
+                    <p><strong>Calories:</strong> ${summary.calories} kcal</p>
+                    <p><strong>Protein:</strong> ${summary.protein}g</p>
+                    <p><strong>Carbs:</strong> ${summary.carbs}g</p>
+                    <p><strong>Fats:</strong> ${summary.fats}g</p>
+                    <p style="font-size: 0.85rem; color: gray;">Updated via AI meal plan</p>
+                  `;
+                });
+            });
+          }
+        })
+        .catch((err) => {
+          output.textContent = "Error generating meals. Please try again.";
+          console.error(err);
+        });
+    }
+  </script>

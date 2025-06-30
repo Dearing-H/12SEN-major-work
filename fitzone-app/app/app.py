@@ -2,7 +2,8 @@ from flask import Flask, render_template, request, flash, session, redirect, url
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import Base, User, Gym, BMIR, CalorieRecord, ExerciseLog, MealLog, WaterIntake, WeightGoal
+from models import Base, User, Gym, BMIR, CalorieRecord, ExerciseLog, MealLog, WaterIntake, WeightGoal, AIWorkoutPlan, DailyNutrition
+from datetime import datetime
 import os
 
 # --- App Setup ---
@@ -16,6 +17,77 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 db_path = os.path.join(basedir, "FITZONE.db")
 engine = create_engine(f"sqlite:///{db_path}", echo=True)
 Session = sessionmaker(bind=engine)
+
+# --- New route to save AI-generated workout plans ---
+@app.route('/save_ai_workout', methods=["POST"])
+def save_ai_workout():
+    if 'user_id' not in session:
+        return {"status": "unauthorized"}, 401
+
+    data = request.get_json()
+    content = data.get("workout_plan")
+
+    if not content:
+        return {"status": "error", "message": "No workout content provided"}, 400
+
+    db_session = Session()
+    try:
+        plan = AIWorkoutPlan(user_id=session['user_id'], content=content)
+        db_session.add(plan)
+        db_session.commit()
+        return {"status": "success"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}, 500
+    finally:
+        db_session.close()
+
+# --- Nutrition Endpoints ---
+@app.route('/save_nutrition', methods=['POST'])
+def save_nutrition():
+    if 'user_id' not in session:
+        return {"status": "unauthorized"}, 401
+
+    data = request.get_json()
+    db_session = Session()
+    try:
+        nutrition = DailyNutrition(
+            user_id=session['user_id'],
+            date=datetime.utcnow().date(),
+            calories=data.get('calories'),
+            protein=data.get('protein'),
+            carbs=data.get('carbs'),
+            fats=data.get('fats')
+        )
+        db_session.add(nutrition)
+        db_session.commit()
+        return {"status": "success"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}, 500
+    finally:
+        db_session.close()
+
+
+@app.route('/get_nutrition_summary')
+def get_nutrition_summary():
+    if 'user_id' not in session:
+        return {"status": "unauthorized"}, 401
+
+    db_session = Session()
+    try:
+        today = datetime.utcnow().date()
+        summary = db_session.query(DailyNutrition).filter_by(user_id=session['user_id'], date=today).first()
+
+        if summary:
+            return {
+                "calories": summary.calories,
+                "protein": summary.protein,
+                "carbs": summary.carbs,
+                "fats": summary.fats
+            }
+        else:
+            return {"calories": 0, "protein": 0, "carbs": 0, "fats": 0}
+    finally:
+        db_session.close()
 
 # --- Routes ---
 

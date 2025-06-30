@@ -37,10 +37,11 @@ class User(Base):
     bmi_records = relationship('BMIR', back_populates='user')  # Historical BMI records
     calorie_records = relationship('CalorieRecord', back_populates='user')  # Calorie tracking logs
     exercise_logs = relationship('ExerciseLog', back_populates='user')  # Exercise session logs
-    meal_logs = relationship('MealLog', back_populates='user')  # Meal intake logs
+    meal_logs = relationship('MealLog', back_populates='user', cascade="all, delete-orphan")  # Meal intake logs
     water_intakes = relationship('WaterIntake', back_populates='user')  # Water consumption logs
     weight_goals = relationship('WeightGoal', back_populates='user')  # Weight goal tracking
     login_sessions = relationship('LoginSession', back_populates='user')  # User login session records
+    ai_workout_plans = relationship('AIWorkoutPlan', back_populates='user')  # AI-generated plans
 
     @classmethod
     def get_by_username(cls, session, username):
@@ -139,6 +140,10 @@ class MealLog(Base):
 
     id = Column(Integer, primary_key=True)
     meal_description = Column(Text, nullable=False)  # Description of the meal consumed
+    calories = Column(Float, nullable=True)  # Calories in the meal
+    protein = Column(Float, nullable=True)   # Protein in grams
+    carbs = Column(Float, nullable=True)     # Carbohydrates in grams
+    fats = Column(Float, nullable=True)      # Fats in grams
     timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))  # Time of meal
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)  # Associated user
 
@@ -191,3 +196,33 @@ class LoginSession(Base):
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)  # Associated user
 
     user = relationship('User', back_populates='login_sessions')
+
+
+class AIWorkoutPlan(Base):
+    """
+    Stores AI-generated workout plans for users.
+    """
+    __tablename__ = 'ai_workout_plans'
+
+    id = Column(Integer, primary_key=True)
+    content = Column(Text, nullable=False)  # AI-generated workout plan text
+    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))  # Time of generation
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)  # Associated user
+
+    user = relationship('User', back_populates='ai_workout_plans')
+
+class DailyNutrition(Base):
+    """
+    Stores daily nutrition summaries for users.
+    """
+    __tablename__ = 'daily_nutrition'
+
+    id = Column(Integer, primary_key=True)
+    date = Column(Date, default=date.today)
+    calories = Column(Float, nullable=True)
+    protein = Column(Float, nullable=True)
+    carbs = Column(Float, nullable=True)
+    fats = Column(Float, nullable=True)
+
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    user = relationship('User', backref='daily_nutrition')
