@@ -260,11 +260,11 @@
     body.light-mode textarea,
     body.light-mode select {
       background: #fff;
-      color: #000;
+      color: var(--text);
     }
     body.light-mode input::placeholder,
     body.light-mode textarea::placeholder {
-      color: #555;
+      color: var(--text);
     }
 
     .logout-button {
@@ -451,10 +451,7 @@
         <div class="nav-icon">📊</div>
         <div class="nav-label">Progress</div>
       </div>
-      <div class="nav-item" onclick="showSection('motivation')">
-        <div class="nav-icon">💬</div>
-        <div class="nav-label">Motivation</div>
-      </div>
+      <!-- Motivation nav item removed -->
       <!-- About nav item -->
       <div class="nav-item" onclick="showSection('about')">
         <div class="nav-icon">ℹ️</div>
@@ -478,9 +475,9 @@
           <h2>Welcome to FITZONE</h2>
           <p>Your ultimate fitness companion! Select any tool from the menu above to track your progress, plan your workouts, and achieve your fitness goals.</p>
           <p>Get started by clicking on one of the icons above to access different features.</p>
-        </div>
-        <div class="motivational-quote">
-          {{ motivational_quote or "“Don’t count the days. Make the days count.” – Muhammad Ali" }}
+          <div class="motivational-quote" style="margin-top: 2rem; font-style: italic; text-align: center; color: var(--text); font-size: 1.1rem;">
+            {{ motivational_quote or "“Don’t count the days. Make the days count.” – Muhammad Ali" }}
+          </div>
         </div>
       </section>
 
@@ -502,7 +499,6 @@
               </div>
               <button type="submit" name="bmi_submit">Save &amp; Calculate BMI ➕</button>
             </form>
-            <button onclick="calculateBMI()">Calculate BMI ➕</button>
           </div>
           <div>
             <div id="bmi-result" class="result" style="margin-top: 1rem;">
@@ -549,7 +545,6 @@
               </div>
               <button type="submit" name="calorie_submit">Save Calories 🍽️</button>
             </form>
-            <button onclick="calculateCalories()">Calculate TDEE 🔥</button>
           </div>
           <div>
             <div class="result" id="cal-result" style="margin-top: 1rem;">
@@ -730,19 +725,27 @@
             <canvas id="progressChart" width="400" height="300"></canvas>
             <div class="result" style="background: #0d1b2a; color: #00e0ff; border-left: 4px solid #00e0ff;">
               <strong>Performance Summary:</strong><br />
-              You've increased reps by 150 since Week 1!<br />
-              You've lost 3 kg – great job!
+              {% if performance_feedback %}
+                {{ performance_feedback }}
+              {% else %}
+                No recent performance data available.
+              {% endif %}
             </div>
-            <div style="margin-top: 1rem; color: var(--text); font-weight: bold;">🏋️ Reps today: 0</div>
+            <div style="margin-top: 1rem; color: var(--text); font-weight: bold;">
+              🏋️ Reps today: {{ reps_today or 0 }}
+            </div>
             <!-- Nutrition Summary Block -->
             <div class="card" style="margin-top: 1rem;">
               <h2 style="margin-bottom: 0.5rem;">🍽️ Daily Nutrition Summary</h2>
               <div id="nutrition-summary" style="font-family: monospace; line-height: 1.6;">
-                <p><strong>Calories:</strong> 2200 kcal</p>
-                <p><strong>Protein:</strong> 150g</p>
-                <p><strong>Carbs:</strong> 180g</p>
-                <p><strong>Fats:</strong> 70g</p>
-                <p style="font-size: 0.85rem; color: gray;">(Sample totals – update based on meal logs)</p>
+                {% if meal_logs and daily_calories is not none and daily_protein is not none and daily_carbs is not none and daily_fats is not none %}
+                  <p>Calories: {{ daily_calories }} kcal</p>
+                  <p>Protein: {{ daily_protein }}g</p>
+                  <p>Carbs: {{ daily_carbs }}g</p>
+                  <p>Fats: {{ daily_fats }}g</p>
+                {% else %}
+                  <p>No meal logs for today.</p>
+                {% endif %}
               </div>
             </div>
             <!-- End Nutrition Summary Block -->
@@ -753,20 +756,43 @@
         </div>
       </section>
 
-      <!-- Motivation Section -->
-      <section id="motivation" class="section">
-        <h2>Get Motivated</h2>
-        <p style="text-align: center;">Click below to fetch a motivational quote tailored to your fitness journey.</p>
-        <div style="text-align: center; margin-top: 1.5rem;">
-          <button onclick="window.location.href='/motivate'">Inspire Me 💡</button>
-        </div>
-      </section>
+      <!-- Motivation Section removed -->
 
       <!-- About Section -->
       <section id="about" class="section">
-        <h2>About FITZONE</h2>
-        <p style="line-height:1.6;">Fitzone is your AI-powered training dashboard. Track your workouts, monitor BMI and calories, log meals and hydration, and focus on targeted muscle development. Designed with best practices in fitness tech.</p>
-        <p style="margin-top:20px;">Inspired by: MyFitnessPal, Strong App, Fitbod.</p>
+        <h1>About FITZONE</h1>
+
+        <div class="section">
+          <p><strong>FITZONE</strong> is an AI-powered training dashboard built to help users track workouts, calculate BMI and daily calories, and monitor fitness progress with real-time feedback. Designed with a sleek, modern interface, the app prioritizes both functionality and user experience.</p>
+        </div>
+
+        <div class="section">
+          <h2>About the Developer</h2>
+          <p>My name is <strong>Harrison Dearing</strong>, and I'm a Year 12 student passionate about both fitness and technology. I built FITZONE as part of my Software Engineering Major Work to combine my technical skills with a real-world application that can genuinely help people take control of their health journey.</p>
+        </div>
+
+        <div class="section">
+          <h2>Key Features</h2>
+          <ul>
+            <li>Smart BMI & TDEE Calculators</li>
+            <li>Daily logging for meals, water, and reps</li>
+            <li>Workout planning and goal setting</li>
+            <li>Progress charts and summaries</li>
+            <li>AI-generated workout and meal plans</li>
+          </ul>
+        </div>
+
+        <div class="section">
+          <h2>Inspired By</h2>
+          <p>This project draws inspiration from apps like <em>MyFitnessPal</em>, <em>Strong</em>, and <em>Fitbod</em>, aiming to offer a seamless all-in-one fitness solution with a personal touch.</p>
+        </div>
+
+        <a href="{{ url_for('dashboard') }}">← Return to Dashboard</a>
+
+        <div class="footer-link">
+          View the full project on GitHub:<br>
+          <a href="https://github.com/Dearing-H/12SEN-major-work" target="_blank">github.com/Dearing-H/12SEN-major-work</a>
+        </div>
       </section>
 
       <!-- <form action="{{ url_for('logout') }}">
@@ -1121,7 +1147,7 @@
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer {{ openai_api_key }}" 
+            "Authorization": "Bearer {{ openai_api_key }}"
           },
           body: JSON.stringify({
             model: "gpt-3.5-turbo",

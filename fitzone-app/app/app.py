@@ -291,7 +291,8 @@ def dashboard():
             water_logs=water_logs,
             progress_labels=progress_labels,
             progress_reps=progress_reps,
-            progress_weight=progress_weight
+            progress_weight=progress_weight,
+            openai_api_key=
         )
     finally:
         db_session.close()
